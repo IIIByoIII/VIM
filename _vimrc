@@ -56,12 +56,14 @@ func! Eatchar(pat)
   return (c =~ a:pat) ? '' : c
 endfunc
 
-augroup abbrevs
+augroup csharp
   "to clear the group before loading
   autocmd!
-  au FileType cs :iabbrev <buffer> forr for (int i = 0; i < ;i++)<esc>4hi<c-r>=Eatchar('\m\s\<bar>/')<cr>
+  au FileType cs :iabbrev <buffer> forr for (int i = 0; i < ; i++)<esc>4hi<c-r>=Eatchar('\m\s\<bar>/')<cr>
   au FileType cs :iabbrev <buffer> iff if ()<esc>i<c-r>=Eatchar('\m\s\<bar>/')<cr>
   au FileType cs :iabbrev <buffer> {} {}<esc>i<return><esc><S-O><c-r>=Eatchar('\m\s\<bar>/')<cr>
+  au FileType cs setlocal shiftwidth=4 tabstop=4
+  au FileType cs setlocal foldmarker=cs,ce
 augroup END
 " For help tags run the command :helptags $vim/vim73/doc
 " Also if you have any help files make sure to put them there
@@ -83,6 +85,8 @@ set undodir=~/vimtmp,.
 
     " === Auto fold code using markers (default {{{}}}) ===
 set foldmethod=marker
+set foldmarker={{{,}}} "force the default marker
+    " to create fold select code visually and press "zf"
 "set foldmethod=indent
 
     " === Pathogen plugin installer. ===
@@ -90,7 +94,7 @@ set foldmethod=marker
 
     " === Tabstops and other cosmetics ===
 set tabstop=4
-set shiftwidth=2
+set shiftwidth=0
 set softtabstop=0
 set smarttab
 set expandtab
@@ -299,8 +303,8 @@ inoremap <M-n> <esc>A)<esc>%:let crtcol = col(".")<cr>%xo<esc>:let crtlin = line
     " XXX === "CTRL key combinations" === {{{
 
     " === Make horizontal scrolling easier ===
-nnoremap <silent> <C-o> 10zl
-nnoremap <silent> <C-i> 10zh
+nnoremap <silent> <C-o> 4zl
+nnoremap <silent> <C-i> 4zh
 
     " === Use <C-b> instead of <C-p> to move backward in the completion list (insert mode) ===
 inoremap <C-b> <C-p>
