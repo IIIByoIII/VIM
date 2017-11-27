@@ -12,10 +12,25 @@ set encoding=utf-8
 setglobal fileencoding=utf-8
 "set fileencodings=ucs-bom,utf-8,latin1
 
+    " === Pathogen plugin installer. ===
+"call pathogen#infect()
+"execute pathogen#infect()
+
 " Set filetype stuff to on
 filetype on
 filetype plugin on
 filetype indent on
+
+    " === Switch on syntax highlighting. ===
+syntax on
+
+  "this function removes a character of your choice (I don't really understand it)
+  "you can view more about this function by typing :helpgrep Eatchar
+  "use after abbreviations by adding this "<c-r>=Eatchar('\s')<cr>" at the end
+func! Eatchar(pat)
+  let c = nr2char(getchar(0))
+  return (c =~ a:pat) ? '' : c
+endfunc
 " }}}
 
 " Autocommands:
@@ -47,23 +62,20 @@ augroup filetypes
   "au BufRead,BufNewFile *.cs set filetype=cbyosharp
   "au BufRead,BufNewFile *.cs~ set filetype=cbyosharp
 augroup END
+" }}}
 
-  "this function removes a character of your choice (I don't really understand it)
-  "you can view more about this function by typing :helpgrep Eatchar
-  "use after abbreviations by adding this "<c-r>=Eatchar('\s')<cr>" at the end
-func! Eatchar(pat)
-  let c = nr2char(getchar(0))
-  return (c =~ a:pat) ? '' : c
-endfunc
-
+" CSharp:
+" {{{
 augroup csharp
   "to clear the group before loading
+  "If you lose current file settings use save the file and use ":e" to reload it
   autocmd!
-  au FileType cs :iabbrev <buffer> forr for (int i = 0; i < ; i++)<esc>4hi<c-r>=Eatchar('\m\s\<bar>/')<cr>
+  au FileType cs :iabbrev <buffer> forr for (int i = 0; i < ; i++)<esc>5hi<c-r>=Eatchar('\m\s\<bar>/')<cr>
   au FileType cs :iabbrev <buffer> iff if ()<esc>i<c-r>=Eatchar('\m\s\<bar>/')<cr>
   au FileType cs :iabbrev <buffer> {} {}<esc>i<return><esc><S-O><c-r>=Eatchar('\m\s\<bar>/')<cr>
   au FileType cs setlocal shiftwidth=4 tabstop=4
-  au FileType cs setlocal foldmarker=cs,ce
+  au FileType cs setlocal foldmarker={,}
+  "au FileType cs setlocal foldmarker=fs,fe
 augroup END
 " For help tags run the command :helptags $vim/vim73/doc
 " Also if you have any help files make sure to put them there
@@ -89,12 +101,9 @@ set foldmarker={{{,}}} "force the default marker
     " to create fold select code visually and press "zf"
 "set foldmethod=indent
 
-    " === Pathogen plugin installer. ===
-"call pathogen#infect()
-
     " === Tabstops and other cosmetics ===
 set tabstop=4
-set shiftwidth=0
+set shiftwidth=2
 set softtabstop=0
 set smarttab
 set expandtab
@@ -133,9 +142,6 @@ set lazyredraw
 
     " === Show the current mode ===
 set showmode
-
-    " === Switch on syntax highlighting. ===
-syntax on
 
     " === Hide the mouse pointer while typing ===
 set mousehide
@@ -200,10 +206,6 @@ set incsearch
     " === Add the unnamed register to the clipboard ===
 set clipboard+=unnamed
 
-    " === Trying out the line numbering thing... never liked it, but that doesn't mean
-    " I shouldn't give it another go :) ===
-"set relativenumber
-
     " === Syntax coloring lines that are too long just slows down the world ===
 set synmaxcol=2048
 
@@ -219,8 +221,8 @@ set nocursorcolumn
 set colorcolumn=80
 
     " === Toggle relative and current line number with reload ===
-set nu!
-set rnu!
+set number!
+set relativenumber!
 
     " === Disable ALT for menu ===
 set winaltkeys=no
@@ -315,8 +317,10 @@ inoremap <C-p> <esc>pa
     " === Set <C-h> to delete character befor cursor ===
 nnoremap <C-h> X
 
-    " === Set <C-l> as delete in insert and command mode ===
-inoremap <C-l> <C-o>x
+    " === Set <C-l> as delete in normal, insert and command mode ===
+"inoremap <C-l> <C-o>x
+nnoremap <C-l> x
+inoremap <C-l> <del>
 cnoremap <C-l> <del>
 
     " === Insert new blank line above and below the cursor ===
@@ -327,6 +331,12 @@ nnoremap <C-k> O<esc>
 nnoremap <C-c> mlviw~`l
 inoremap <C-c> <esc>mlviw~`la
 vnoremap <C-c> <esc>mlviw~`lv
+
+    " === Insert new line above (similar to Ctrl+j) ===
+inoremap <C-k> <esc>O
+
+    " === Use Ctrl+v instead of Ctrl+k to enter digraph ===
+inoremap <C-v> <C-k>
 " }}}
 
     " XXX === "Leader key combitations" === {{{
@@ -343,8 +353,11 @@ nnoremap <silent> <leader>sn :so $Vim/\vim73/\syntax/\newlisp.vim<cr>
 "nnoremap <silent> <leader>sh :set syntax=heidenhain<cr>
 
     " === Change foldmethod to marker or to indent ===
-nnoremap <leader>i :set foldmethod=indent<cr>
-nnoremap <leader>m :set foldmethod=marker<cr>
+nnoremap <leader>zi :set foldmethod=indent<cr>
+nnoremap <leader>zm :set foldmethod=marker<cr>
+
+    " === Close all folds but the one the cursor is (open up to 8 levels)
+nnoremap <leader>zz zMzozozozozozozozo
 
     " === Yank word with ",y" and swap it with ",s" or paste it with ",p" ===
 nnoremap <leader>y my\"yyiw`y:echo "Word marked!"<cr>
@@ -414,15 +427,15 @@ cnoremap jk <esc>
 nnoremap <space> za
 vnoremap <space> za
 
-    " === Set middle mouse button as space ===
-nnoremap <MiddleMouse> <space>
-nnoremap <2-MiddleMouse> <space>
-nnoremap <3-MiddleMouse> <space>
-nnoremap <4-MiddleMouse> <space>
-vnoremap <MiddleMouse> <space>
-vnoremap <2-MiddleMouse> <space>
-vnoremap <3-MiddleMouse> <space>
-vnoremap <4-MiddleMouse> <space>
+    " === Set middle mouse button to toggle folds ===
+nnoremap <MiddleMouse> za
+nnoremap <2-MiddleMouse> za
+nnoremap <3-MiddleMouse> za
+nnoremap <4-MiddleMouse> za
+vnoremap <MiddleMouse> za
+vnoremap <2-MiddleMouse> za
+vnoremap <3-MiddleMouse> za
+vnoremap <4-MiddleMouse> za
 
     " === Map the ; as : for entering a command ===
 nnoremap ; :
@@ -448,7 +461,7 @@ map <F10> <esc>:echo "hi<" . synIDattr(synID(line("."),col("."),1),"name") . '> 
 " }}}
 
     " XXX === "Movement mappings" === {{{
-" as as (das fa) sad ad { saddasd} sadads 
+" for testing: as as (dap fa) sad ad { saddasd} sadads 
     "Inside "(" parantheses
 :onoremap p i(
 
@@ -462,11 +475,10 @@ map <F10> <esc>:echo "hi<" . synIDattr(synID(line("."),col("."),1),"name") . '> 
 :onoremap ilp :<C-u>normal! F)vi(<cr>
 
     "Inside next "{" curly parantheses
-:onoremap inc :<C-u>normal! f(vi(<cr>
+:onoremap inc :<C-u>normal! f{vi{<cr>
 
     "Inside last "{" curly parantheses
 :onoremap ilc :<C-u>normal! F}vi{<cr>
-
 " }}}
 
     " XXX === "Disabled keys" === {{{
