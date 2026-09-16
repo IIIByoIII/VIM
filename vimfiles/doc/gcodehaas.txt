@@ -1,0 +1,2179 @@
+*gcodehaas.txt* For Vim version 7.4.  Last change: 2018 Jul
+
+   HELP FILE FOR HAAS G-CODE         by eng. Robert Kiss
+
+to make help files see ":help help-writing"~
+characters to use in help file: * | ~ [] {} ~
+to make changes in a help file use ":set modifiable"~
+to split lines into 80 characters use visual selection and "gq"~
+to get tags run ":helptags $HOME/vimfiles/doc" abbrev helptsave~
+or see ":help helptags" for more information~
+VIM shortcuts:
+  Lathe:
+    gq (position cursor and reset counter)
+    gw (repeat for every tool)
+    ge (repeat for every operation)
+    gr (search for next tool)
+    gt (insert efficient tool change)
+  Mill:
+    fg (3 axis tidy up, position cursor and reset counter)
+    fh (4 axis tidy up, position cursor and reset counter)
+    fv (only for 1 tool parametric number and tidy up)
+    fb (parametric first tool)
+    fn (parametric rest of the tools and tidy up)
+    fm (4 axis parametric origin and A rotation changes)
+    ft (insert tool call and change in current position)
+    fk (remove duplicate feed rates and round them down)
+=============================
+========== G Codes ==========~
+=============================
+Code  Group   Function~
+*G00*   {*01}   Rapid Motion |G00-Info|
+*G01*   {01}    Linear Interpolation Motion |G01-Info|
+*G02*   {01}    CW Interpolation Motion (Right) |G02-Info|
+*G03*   {01}    CCW Interpolation Motion (Left) |G03-Info|
+*G04*   {00}    Dwell |G04-Info|
+*G05*
+*G06*
+*G07*
+*G08*
+*G09*   {00}    Exact Stop (non-modal) |G09-Info|
+*G10*   {00}    Programmable Offset Setting |G10-Info|
+*G11*
+*G12*   {00}    CW Circular Pocket Milling (Yasnac)
+*G13*   {00}    CCW Circular Pocket Milling (Yasnac)
+*G14*
+*G15*
+*G16*
+*G17*   {*02}   XY Plane Selection (circular interpolation)
+*G18*   {02}    ZX Plane Selection (circular interpolation)
+*G19*   {02}    YZ Plane Selection (circular interpolation)
+*G20*   {06}    Inch Programming Selection
+*G21*   {06}    Metric Programming Selection
+*G22*
+*G23*
+*G24*
+*G25*
+*G26*
+*G27*
+*G28*   {00}    Return to Machine Zero through Reference Point
+*G29*   {00}    Move to Location through G28 Reference- never used
+*G30*
+*G31*   {00}    Skip Function (used in probing)
+*G32*   {01}    Thread Cutting [Lathe] |G32-Info|
+*G33*
+*G34*
+*G35*   {00}    Automatic Tool Diameter Measurement (probing)
+*G36*   {00}    Automatic Work Offset Measurement (probing)
+*G37*   {00}    Automatic Tool Length Measurement (probing)
+*G38*
+*G39*
+*G40*   {*07}   Cutter Comp Cancel |G40-Info|
+*G41*   {07}    Cutter Compensation Left |G41-Info|
+*G42*   {07}    Cutter Compensation Right |G42-Info|
+*G43*   {08}    Tool Length Compensation |G43-Info|
+*G44*   {08}    Tool Length Compensation subtract |G44-Info|
+*G45*
+*G46*
+*G47*   {00}    Engraving |G47-Info|
+*G48*
+*G49*   {*08}   G43/G44/G143 Cancel |G49-Info|
+*G50*   {11}    G51 (scaling) Cancel [Mill] / Limit RPM [Lathe] |G50-Info|
+*G51*   {11}    Scaling (option) |G51-Info|
+*G52*   {12}    Global work coordinate shift |G52-Info|
+*G53*   {00}    Non-Modal Machine Coordinate Selection |G53-Info|
+*G54*   {*12}   Select Work Coordinate System l |G54-Info|
+*G55*   {12}    Select Work Coordinate System 2
+*G56*   {12}    Select Work Coordinate System 3
+*G57*   {12}    Select Work Coordinate System 4
+*G58*   {12}    Select Work Coordinate System 5
+*G59*   {12}    Select Work Coordinate System 6 |G59-Info|
+*G60*   {00}    Unidirectional Positioning (never used)
+*G61*   {13}    Exact Stop Modal
+*G62*
+*G63*
+*G64*   {*13}   G61 Cancel
+*G65*   {00}    Macro Subroutine Call (used in conjunction with P value)
+*G66*
+*G67*
+*G68*   {16}    Rotation (option, comes with probing) |G68-Info|
+*G69*   {16}    G68 Cancel Rotation
+*G70*   {00}    Finishing cycle [Lathe] |G70-Info|
+*G71*   {00}    Roughing cycle {Axial} [Lathe] |G71-Info|
+*G72*   {00}    Roughing cycle {Radial} [Lathe] |G72-Info|
+*G73*   {09}    HS Peck Drill [Mill] / Roughing cycle {offset} [Lathe] |G73-Info|
+*G74*   {09}    Reverse Tap Canned Cycle [Mill] / End Face Grooving [Lathe]
+*G75*   {00}    O.D./I.D. Grooving Cycle [Lathe]
+*G76*   {09}    Fine Boring Canned Cycle [Mill] / Threading, Multiple Pass [Lathe]
+*G77*   {09}    Back Bore Canned Cycle [Mill]
+*G78*
+*G79*
+*G80*   {*09}   Canned Cycle Cancel
+*G81*   {09}    Drill Canned Cycle
+*G82*   {09}    Spot Drill Canned Cycle
+*G83*   {09}    Peck Drill Canned Cycle (for deep holes)
+*G84*   {09}    Tapping Canned Cycle
+*G85*   {09}    Boring Canned Cycle
+*G86*   {09}    Bore/Stop Canned Cycle
+*G87*   {09}    Bore/Manual Retract Canned Cycle
+*G88*   {09}    Bore/Dwell Canned Cycle
+*G89*   {09}    Bore Canned Cycle
+*G90*   {*03}   Absolute positioning |G90-Info|
+*G91*   {03}    Incremental positioning |G91-Info|
+*G92*   {00}    Set Work Coordinates - FANUC or HAAS |G92-Info|
+-\\-  {00}    Set Work Coordinates - YASNAC
+*G93*   {05}    Inverse Time Feed Mode |G93-Info|
+*G94*   {05}    Feed per minute [Mill] |G94-Info|
+*G95*   {05}    Feed per revolution [Mill] Live Tool Rigid Tapping {09} [Lathe] |G95-Info|
+*G96*   {13}    Set Speed to CSS [Lathe] |G96-Info|
+*G97*   {13}    Set speed to RPM [Lathe] |G97-Info|
+*G98*   {*10}   Initial Point Return [Mill] Feed per minute [Lathe] |G98-Info|
+*G99*   {10}    R Plane Return [Mill] Feed per revolution [Lathe] |G99-Info|
+*G100*  {00}    Disable Mirror Image |G100-Info|
+*G101*  {00}    Enable Mirror Image (comes with probing) |G101-Info|
+*G102*  {00}    Programmable Output to RS-232 |G102-Info|
+*G103*  {00}    Block Look ahead Limit (with P value) |G103-Info|
+*G104*
+*G105*  {00}    Servo Bar Command (Bar feeder) [Lathe]
+*G106*
+*G107*  {00}    Cylindrical Mapping
+*G108*
+*G109*
+*G110*  {12}    Select Coordinate System 7 (Older Machines) |G110-Info|
+*G111*  {12}    Select Coordinate System 8 (Older Machines)
+*G112*  {12}{04}Coor. Sys. 9 [Mill] XY to XC Interpolation [Lathe] |G112-Info|
+*G113*  {12}{04}Coor. Sys 10 [Mill] Cancel Interpolation [Lathe] |G113-Info|
+*G114*  {12}    Select Coordinate System 11 (Older Machines)
+*G115*  {12}    Select Coordinate System 12 (Older Machines)
+*G116*  {12}    Select Coordinate System 13 (Older Machines)
+*G117*  {12}    Select Coordinate System 14 (Older Machines)
+*G118*  {12}    Select Coordinate System 15 (Older Machines)
+*G119*  {12}    Select Coordinate System 16 (Older Machines)
+*G120*  {12}    Select Coordinate System 17 (Older Machines)
+*G121*  {12}    Select Coordinate System 18 (Older Machines)
+*G122*  {12}    Select Coordinate System 19 (Older Machines)
+*G123*  {12}    Select Coordinate System 20 (Older Machines)
+*G124*  {12}    Select Coordinate System 21 (Older Machines)
+*G125*  {12}    Select Coordinate System 22 (Older Machines)
+*G126*  {12}    Select Coordinate System 23 (Older Machines)
+*G127*  {12}    Select Coordinate System 24 (Older Machines)
+*G128*  {12}    Select Coordinate System 25 (Older Machines)
+*G129*  {12}    Select Coordinate System 26 (Older Machines) |G129-Info|
+*G130*
+*G131*
+*G132*
+*G133*
+*G134*
+*G135*
+*G136*  {00}    Automatic Work Offset Center Measurement
+*G137*
+*G138*
+*G139*
+*G140*
+*G141*  {07}    3D+ Cutter Compensation
+*G142*
+*G143*  {08}    5-Axis Tool Length Compensation +
+*G144*
+*G145*
+*G146*
+*G147*
+*G148*
+*G149*
+*G150*  {00}    General Purpose Pocket Milling
+*G151*
+*G152*
+*G153*
+*G154* P1-P99 {12} Select Coordinate System 7-106 (New Machines) |G154-Info|
+*G155*
+*G156*
+*G157*
+*G158*
+*G159*
+*G160*
+*G161*
+*G162*
+*G163*
+*G164*
+*G165*
+*G166*
+*G167*  {00}    Modify Setting |G167-Info|
+*G168*
+*G169*
+*G170*
+*G171*
+*G172*
+*G173*
+*G174*
+*G175*
+*G176*
+*G177*
+*G178*
+*G179*
+*G180*
+*G181*
+*G182*
+*G183*
+*G184*  {09}    Reverse Tapping Cycle [Lathe]
+*G185*
+*G186*  {09}    Reverse Live Tool Rigid Tapping [Lathe]
+*G187*  {00}    Accuracy Control for High Speed Machining
+*G188*
+*G189*
+*G190*
+*G191*
+*G192*
+*G193*
+*G194*
+*G195*  {09}    Forward Live Tool Radial Tapping [Lathe]
+*G196*  {09}    Reverse Live Tool Radial Tapping [Lathe]
+*G197*
+*G198*  {00}    Disengage Synchronous Spindle Control [Lathe]
+*G199*  {00}    Engage Synchronous Spindle Control [Lathe]
+*G200*  {00}    Index on the Fly |G200-Info|
+-----------------------------
+{*01} *G00-Info* RAPID MOTION
+    * X - Optional X-Axis motion command
+    * Y - Optional Y-Axis motion command
+    * Z - Optional Z-Axis motion command
+    * A - Optional A-Axis motion command
+    * B - Optional B-Axis motion command
+    * C - Optional C-axis motion command
+    * E - Optional code to specify the rapid rate of the block as a percent.
+    *indicates optional
+
+  G00 is used to move the machine axes at the maximum speed. It is primarily
+  used to quickly position the machine to a given point before each feed
+  (cutting) command. This G code is modal, so a block with G00 causes all
+  following blocks to be rapid motion until another Group 01 code is
+  specified.
+
+  A rapid move also cancels an active canned cycle, just like G80 does.
+
+  Generally, rapid motion will not be in a single straight line. Each axis
+  specified moves at its maximum speed, but all axes will not necessarily
+  complete their motions at the same time. The machine waits until all
+  motions are complete before starting the next command.
+
+  Default is dogleg rapid motion, see parameter 335, if set to NONE it's
+  dogleg, if it's LINEAR, the motion will be like with |G01|
+
+  Setting 57 (Exact Stop Canned X-Y) can change how closely the machine waits
+  for a precise stop before and after a rapid move.
+-----------------------------
+{01} *G01-Info* LINEAR INTERPOLATION MOTION
+    F - Feedrate
+    * X - X-Axis motion command
+    * Y - Y-Axis motion command
+    * Z - Z-Axis motion command
+    * A - A-Axis motion command
+    * B - B-Axis motion command
+    * C - C-axis motion command
+    * ,R - Radius of the arc
+    * ,C - Chamfer distance
+    *indicates optional
+  G01 moves the axes at a commanded feed rate. It is primarily used to cut the
+  workpiece. A G01 feed can be a single axis move or a combination of the
+  axes. The rate of axes movement is controlled by feedrate ( F) value. This F
+  value can be in units (inch or metric) per minute ( G94) or per spindle
+  revolution ( G95), or time to complete the motion ( G93). The feedrate value
+  ( F) can be on the current program line, or a previous line. The control
+  will always use the most recent F value until another F value is commanded.
+  If in G93, an F value is used on each line. Refer also to G93.
+  
+  G01 is a modal command, which means that it will stay in effect until
+  canceled by a rapid command such as G00 or a circular motion command like
+  G02 or G03.
+  
+  Once a G01 is started all programmed axes move and reach the destination at the same time. If an axis is not capable of the programmed feedrate the control will not proceed with the G01 command and an alarm (max feedrate exceeded) will be generated.
+  
+  Corner Rounding and Chamfering Example
+  %
+  O60011 (G01 CORNER ROUNDING & CHAMFER) ;
+  (G54 X0 Y0 is at the top-right of part) ;
+  (Z0 is on top of the part) ;
+  (T1 is an end mill) ;
+  (BEGIN PREPARATION BLOCKS) ;
+  T1 M06 (Select tool 1) ;
+  G00 G90 G40 G49 G54 (Safe startup) ;
+  G00 G54 X0 Y0 (Rapid to 1st position) ;
+  S1000 M03 (Spindle on CW) ;
+  G43 H01 Z0.1 (Activate tool offset 1) ;
+  M08 (Coolant on) ;
+  (BEGIN CUTTING BLOCKS) ;
+  G01 Z-0.5 F20. (Feed to cutting depth) ;
+  Y-5. ,C1. (Chamfer) ;
+  X-5. ,R1. (Corner-round) ;
+  Y0 (Feed to Y0.) ;
+  (BEGIN COMPLETION BLOCKS) ;
+  G00 Z0.1 M09 (Rapid retract, Coolant off) ;
+  G53 G49 Z0 M05 (Z home, Spindle off) ;
+  G53 Y0 (Y home) ;
+  M30 (End program) ;
+  %
+  
+  A chamfer block or a corner-rounding block can be automatically inserted
+  between two linear interpolation blocks by specifying ,C (chamfering) or ,R
+  (corner rounding). There must be a terminating linear interpolation block
+  after the beginning block (a G04 pause may intervene).
+  
+  These two linear interpolation blocks specify a corner of intersection. If
+  the beginning block specifies a ,C, the value after the ,C is the distance
+  from the intersection to where the chamfer begins, and also the distance
+  from the intersection to where the chamfer ends. If the beginning block
+  specifies an ,R, the value after the ,R is the radius of a circle tangent to
+  the corner at two points: the beginning of the corner-rounding arc and the
+  endpoint of that arc. There can be consecutive blocks with chamfering or
+  corner rounding specified. There must be movement on the two axes specified
+  by the selected plane, whether the active plane is XY ( G17), XZ ( G18) or
+  YZ ( G19).
+-----------------------------
+{01} *G02-Info* OR *G03-Info* CIRCULAR INTERPOLATION MOTION
+    F - Feedrate
+    * I - Distance along X Axis to center of circle
+    * J - Distance along Y Axis to center of circle
+    * K - Distance along Z Axis to center of circle
+    * R - Radius of circle
+    * X - X-Axis motion command
+    * Y - Y-Axis motion command
+    * Z - Z-Axis motion command
+    * A - A-Axis motion command
+    *indicates optional
+
+  I,J and K is the preferred method to program a radius. R is suitable for
+  general radii.
+
+  These G codes are used to specify circular motion. Two axes are necessary to
+  complete circular motion and the correct plane, G17-G19, must be used. There
+  are two methods of commanding a G02 or G03, the first is using the I, J, K
+  addresses and the second is using the R address.
+
+  Using I, J, K addresses
+
+  I, J and K address are used to locate the arc center in relation to the
+  start point. In other words, the I, J, K addresses are the distances from
+  the starting point to the center of the circle. Only the I, J, or K specific
+  to the selected plane are allowed (G17 uses IJ, G18 uses IK and G19 uses
+  JK). The X, Y, and Z commands specify the end point of the arc. If the X, Y,
+  and Z location for the selected plane is not specified, the endpoint of the
+  arc is the same as the starting point for that axis.
+
+  To cut a full circle the I, J, K addresses must be used; using an R address
+  will not work. To cut a full circle, do not specify an ending point (X, Y,
+  and Z ); program I, J, or K to define the center of the circle. For example:
+
+  G02 I3.0 J4.0 (Assumes G17; XY plane) ; Using the R address
+
+  The R-value defines the distance from the starting point to the center of
+  the circle. Use a positive R-value for radii of 180 or less, and a negative
+  R-value for radii more than 180.
+
+  Thread Milling
+
+  Thread milling uses a standard G02 or G03 move to create the circular move
+  in X-Y, then adds a Z move on the same block to create the thread pitch.
+  This generates one turn of the thread; the multiple teeth of the cutter
+  generate the rest. Typical block of code:
+
+  N100 G02 I-1.0 Z-.05 F5. (generates 1-inch radius for 20-pitch thread) ;
+  Thread milling notes:
+
+  Internal holes smaller than 3/8 inch may not be possible or practical.
+  Always climb cut the cutter.
+
+  Use a G03 to cut I.D. threads or a G02 to cut O.D. threads. An I.D. right
+  hand thread will move up in the Z-Axis by the amount of one thread pitch. An
+  O.D. right hand thread will move down in the Z-Axis by the amount of one
+  thread pitch. PITCH = 1/Threads per inch (Example - 1.0 divided by 8 TPI =
+  .125)
+
+  You cannot turn cutter compensation off or on during an arc movement. You
+  must program a linear move, either in the X or Y Axis, to move the tool to
+  and from the diameter to cut. This move will be the maximum compensation
+  amount that you can adjust.
+
+  Helical (spiral) motion is possible with G02 or G03 by programming the
+  linear axis that is not in the selected plane. This third axis will be moved
+  along the specified axis in a linear manner, while the other two axes will
+  be moved in the circular motion. The speed of each axis will be controlled
+  so that the helical rate matches the programmed feedrate.
+-----------------------------
+{00} *G04-Info* DWELL
+    P - The dwell time in seconds or milliseconds
+
+  The P values are modal. This means if you are in the middle of a canned
+  cycle and a G04 Pnn or an M97 Pnn is used the P value will be used for the
+  dwell / subprogram as well as the canned cycle.
+
+  G04 specifies a delay or dwell in the program. The block with G04 delay for
+  the time specified by the P address code. For example:
+
+  G04 P10.0. ; Delays the program for 10 seconds.
+
+  G04 P10. is a dwell of 10 seconds; G04 P10 is a dwell of 10 milliseconds.
+  Make sure you use decimal points correctly so that you specify the correct
+  dwell time.
+-----------------------------
+{00} *G09-Info* EXACT STOP
+  It is used to specify a controlled axes stop. It affects only the
+  block in which it is commanded. It is non-modal and does not affect the
+  blocks that come after the block where it is commanded. Machine moves
+  decelerate to the programmed point before the control processes the next
+  command.
+-----------------------------
+{00} *G10-Info* SET OFFSETS
+  G10 lets you set offsets within the program. G10 replaces manual offset
+  entry (i.e. Tool length and diameter, and work coordinate offsets).
+
+  L - Selects offset category.
+    L2 Work coordinate origin for COMMON and G54-G59
+    L10 Geometry or shift offset
+    L1 or L11 Tool wear
+    L20 Auxiliary work coordinate origin for G110-G129
+
+  P - Selects a specific offset.
+    P1-P50 - References geometry, wear or work offsets (L10-L11)
+    P0 - References COMMON work coordinate offset (L2)
+    P1-P6 - G54-G59 references work coordinates (L2)
+    P1-P20G110-G129 references auxiliary coordinates (L20)
+    P1-P99G154 P1-P99 reference auxiliary coordinate (L20)
+
+  Q - Imaginary tool nose tip direction
+  R - Tool nose radius
+  * U - Incremental amount to be added to X-axis offset
+  * W - Incremental amount to be added to Z-axis offset
+  * X - X-axis offset
+  * Z - Z-axis offset
+  * indicates optional
+-----------------------------
+{01} *G32-Info* THREAD CUTTING
+
+  [Lathe]
+  F - Feedrate in inches (mm) per minute
+  Q - Thread Start Angle (optional).
+  U/W - X/Z-axis incremental positioning command. (Incremental thread depth
+        values are user specified)
+  X/Z - X/Z-axis absolute positioning command. (Thread depth values are user
+        specified)
+
+  Feedrate is equivalent to thread lead. Movement on at least one axis must be
+  specified. Tapered threads have lead in both X and Z. In this case set the
+  feedrate to the larger of the two leads. G99 (Feed per Revolution) must be
+  active.
+
+  G32 differs from other thread cutting cycles in that taper and/or lead can
+  vary continuously throughout the entire thread. In addition, no automatic
+  position return is performed at the end of the threading operation.
+
+  At the first line of a G32 block of code, axis feed is synchronized with the
+  rotation signal of the spindle encoder. This synchronization remains in
+  effect for each line in a G32 sequence. It is possible to cancel G32 and
+  recall it without losing the original synchronization. This means multiple
+  passes will exactly follow the previous tool path. (The actual spindle RPM
+  must be exactly the same between passes).
+
+  Single Block Stop and Feed Hold are deferred until last line of a G32
+  sequence. Feedrate Override is ignored while G32 is active, Actual Feedrate
+  will always be 100% of programmed feedrate. M23 and M24 have no affect on a
+  G32 operation, the user must program chamfering if needed. G32 must not be
+  used with any G-code Canned Cycles (i.e.: G71 ). Do Not change spindle RPM
+  during threading.
+
+  G32 is Modal. Always cancel G32 with another Group 01 G-code at the end of a
+  threading operation. (Group 01 G-codes: G00 , G01 , G02 , G03 , G32 , G90 ,
+  G92 , and G94 .
+-----------------------------
+{*07} *G40-Info* TOOL NOSE/CUTTER COMPENSATION CANCEL
+
+  [LATHE]
+    * X - X Axis absolute location of departure target
+    * Z - Z Axis absolute location of departure target
+    * U - X Axis incremental distance to departure target
+    * W - Z Axis incremental distance to departure target
+    * indicates optional
+
+  G40 cancels G41 or G42. Programming Txx00 will also cancel tool nose
+  compensation. Cancel tool nose compensation before the end of a program.
+
+  The tool departure usually does not correspond with a point on the part. In
+  many cases overcutting or undercutting can occur.
+
+  [MILL]
+  G40 cancels G41 or G42 cutter compensation.
+-----------------------------
+{07} *G41-Info* OR *G42-Info* TOOL NOSE/CUTTER COMPENSATION LEFT AND RIGHT
+
+  [LATHE]
+  G41 or G42 will select tool nose compensation. G41 moves the tool to the left
+  of the programmed path to compensate for the size of a tool and vice versa for
+  G42. A tool offset must be selected with a Tnnxx code. where xx corresponds to
+  the offsets that are to be used with the tool.
+
+  [MILL]
+  G41 will select cutter compensation left; that is, the tool is moved to the
+  left of the programmed path to compensate for the size of the tool. A D
+  address must be programmed to select the correct tool radius or diameter
+  offset. If the value in the selected offset is negative, cutter compensation
+  will operate as though G42 (Cutter Comp Right.) was specified.
+
+  The right or left side of the programmed path is determined by looking at
+  the tool as it moves away. If the tool needs to be on the left of the
+  programmed path as it moves away, use G41. If it needs to be on the right of
+  the programmed path as it moves away, use G42. For more information, refer
+  to the Cutter Compensation section.
+-----------------------------
+{08} *G43-Info* OR *G44-Info* TOOL LENGTH COMPENSATION
+  A G43 code selects tool length compensation in the positive direction; the
+  tool length in the offsets page is added to the commanded axis position. A
+  G44 code selects tool length compensation in the negative direction; the
+  tool length in the offsets page is subtracted from the commanded axis
+  position. A non-zero H address must be entered to select the correct entry
+  from the offsets page.
+
+  Is the code we use to establish a tool length to the control. Upon setup,
+  the operator will determine the tool length and input that dimension into
+  the Tool Offset Memory for that tool.  Each tool in the machine will have a
+  defined tool length, and this will be presented to the control in the form
+  of an “H” value. (H1 is equal to tool length offset #1, H2 = length offset
+  #2, etc…….)
+-----------------------------
+{00} *G47-Info* TEXT ENGRAVING
+  G47 lets you engrave a line of text, or sequential serial numbers, with a
+  single G-code. To use G47, Settings 29 (G91 Non-Modal) and 73 (G68
+  Incremental Angle) must be OFF.
+  Note: Engraving along an arc is not supported.~
+    *E  Plunge feed rate (units/min)
+    F   Engraving feedrate (units/min)
+    *I  Angle of rotation (-360. to +360.); default is 0
+    *J  Height of text in in/mm (minimum = 0.001 inch); default is 1.0 inch
+    P   0 for literal text engraving
+        1 for sequential serial number engraving
+        32-126 for ASCII characters
+    *R  Return plane
+    *X  X start of engraving
+    *Y  Y start of engraving
+    *Z  Depth of cut
+    *   indicates optional
+  Literal Text Engraving~
+  This method is used to engrave text on a part. The text should be in the
+  form of a comment on the same line as the G47 command. For example, G47 P0
+  (TEXT TO ENGRAVE), will engrave TEXT TO ENGRAVE on the part.
+  Note: Corner rounding can cause engraved text to appear rounded and make
+  them harder to read. To improve the sharpness and readability of engraved
+  text, consider lowering the corner-rounding values with a G187 E.Xxx value
+  before the G47 command. Suggested starting E values are E0.002 (inch) or
+  E0.05 (metric).  Command a G187 alone after the engraving cycle to restore
+  the default corner-rounding level. Refer to the example below:
+      G187 E.002 (PREFACE ENGRAVING WITH A G187 E.xxx);
+      G47 P0 X.15 Y0. I0. J.15 R.1 Z-.004 F80. E40. (Engraving Text);
+      G00 G80 Z0.1;
+      G187 (RESTORE NORMAL CORNER ROUNDING FOR SMOOTHNESS);
+  The characters available for engraving are:
+  A-Z, a-z 0-9, and ` ~ ! @ # $ % ^ & * - _ = + [ ] { } \ | ; : ’ ” , . / < > ?
+  Not all of these characters can be entered from the control. When
+  programming from the mill keypad, or engraving parenthesis (), refer to the
+  following Engraving Special Characters section.
+  Engraving Special Characters involves using G47 with specific P values ( G47
+  P32-126).
+      G47 P Values for Special Characters~
+      32   space                        59 ; semicolon
+      33 ! exclamation mark             60 < less than
+      34 " double quotation mark        61 = equals
+      35 # number sign                  62 > greater than
+      36 $ dollar sign                  63 ? question mark
+      37 % percent sign                 64 @ at sign
+      38 & ampersand                    65-90 A-Z capitol letters
+      39 ’ closed single quote          91 [ open square bracket
+      40 ( open parenthesis             92 \ backslash
+      41 ) close parenthesis            93 ] closed square bracket
+      42 * asterisk                     94 ^ carrot
+      43 + plus sign                    95 _ underscore
+      44 , comma                        96 ‘ open single quote
+      45 - minus sign                   97-122 a-z lowercase letters
+      46 . period                       123 { open curly bracket
+      47 / slash                        124 | vertical bar
+      48-57 0-9 numbers                 125 } closed curly bracket
+      58 : colon                        126 ~ tilde
+  Example:
+  To engrave $2.00, you need (2) blocks of code. The first block uses a P36 to
+  engrave the dollar sign ($), and the second block uses P0 (2.00).
+    Note: Shift the X/Y start location between the first and second line of
+    code to make a space between the dollar sign and the 2. 
+  This is the only method to engrave parenthesis ()
+  Setting Initial Serial Number to be Engraved~
+  There are two ways to set the initial serial number to be engraved. The
+  first requires replacing the # symbols within the parenthesis with the first
+  number to be engraved. With this method, nothing is engraved when the G47
+  line is executed (it is only setting the initial serial number). Execute
+  this once and then change the value within the parenthesis back to
+  # symbols to engrave normally.
+  The following example will set the initial serial number to be engraved to
+  0001. Run this code once and then change (0001) to (####).
+      G47 P1 (0001) ;
+  The second method for setting the initial serial number to be engraved is to
+  change the Macro Variable where this value is stored (Macro Variable 599).
+  The Macros option does not need to be enabled.
+  Sequential Serial Number Engraving (G47 P1)~
+  This method is used to engrave numbers on a series of parts with the number
+  being increased by one each time. The # symbol is used to set the number of
+  digits in the serial number. For example, G47 P1 (####), limits the number
+  to four digits while (##) would limit the serial number to two digits.
+  Engraving Around the Outside of a Rotary Part (G47, G107)~
+  You can combine a G47 Engraving cycle with a G107 Cylindrical Mapping cycle
+  to engrave text (or a serial number) along the outside diameter of a rotary
+  part.
+  This code engraves a four digit serial number along the outer diameter of a
+  rotary part.
+        O60472 (G47 SERIAL NUMBER ENGRAVING) ;
+        (G54 X0 Y0 is at the bottom left of the part) ;
+        (Z0 is on top of the part) ;
+        (BEGIN PREPARATION BLOCKS) ;
+        T1 M06 (Select tool 1) ;
+        G00 G90 G40 G49 G54 (Safe startup) ;
+        G00 G54 X2. Y2. (Rapid to 1st position) ;
+        S1000 M03 (Spindle on CW) ;
+        G43 H01 Z0.1 (Activate tool offset 1) ;
+        M08 (Coolant on) ;
+        (BEGIN CUTTING BLOCKS) ;
+        G47 P1 (####) X2. Y2. J0.5 R0.05 Z-0.005 F15. E10. ;
+        (Engraves serial number) ;
+        (BEGIN COMPLETION BLOCKS) ;
+        G00 Z0.1 M09 (Rapid retract, Coolant off) ;
+        G53 G49 Z0 M05 (Z home, Spindle off) ;
+        G53 Y0 (Y home) ;
+        M30 (End program) ;
+  Notes:
+  - G47 uses a built-in block font to engrave characters. If you need a
+    different font, or special characters, you cannot use G47.  Corrective
+    Action: Use a CAM system or other programming method to define toolpaths
+    for special fonts or characters
+  - G47 is not available on lathes. To engrave characters on lathe, use a CAM
+    system or manual programming.
+-----------------------------
+{08*} *G49-Info* OR *H00-Info* CANCELING TOOL COMPENSATION
+  To cancel tool length compensation, we can either use the code of G49, G28
+  (Go to machine home position) or use an H value of H00.  M30 (program end)
+  or depressing the reset button will also cancel tool length compensation.
+
+-----------------------------
+{11} *G50-Info* SPINDLE SPEED LIMIT OR CANCEL SCALING
+
+  [LATHE]
+  G50 can be used to limit the maximum spindle speed. The control will not
+  allow the spindle to exceed the S address value specified in the G50
+  command. This is used in constant surface feed mode (G96).
+
+  This G code will also limit the secondary spindle on DS-Series machines.
+
+  N1G50 S3000 (Spindle rpm will not exceed 3000 rpm) ; N2G97 M3 (Enter
+  constant surface speed cancel, spindle on) ;
+
+  To cancel this command, use another G50 and specify the maximum spindle RPM
+  for the machine.
+
+  [MILL]
+  G50 cancels the optional scaling feature. Any axis scaled by a previous G51
+  command is no longer in effect.
+-----------------------------
+{11} *G51-Info* SCALING
+  * X - Center of scaling for the X Axis
+  * Y - Center of scaling for the Y Axis
+  * Z - Center of scaling for the Z Axis 
+  * P - Scaling factor for all axes;
+  * three-place decimal from 0.001 to 999.999
+  *indicates optional
+
+  G51 [X...] [Y...] [Z...] [P...] ;
+  The control always uses a scaling center to determine the scaled position.
+  If you do not specify a scaling center in the G51 command block, then the
+  control uses the last commanded position as the scaling center.
+
+  With a scaling (G51) command, the control multiplies by a scaling factor (P)
+  all X, Y, Z, A, B, and C end points for rapids, linear feeds, and circular
+  feeds. G51 also scales I, J, K, and R for G02 and G03. The control offsets
+  all of these positions relative to a scaling center.
+
+  There are (3) ways to specify the scaling factor:
+
+   -A P address code in the G51 block applies the specified scaling factor to
+    all axes.
+
+   -Setting 71 applies its value as a scaling factor to all axes if it has a
+    nonzero value and you do not use a P address code.
+
+   -Settings 188, 189, and 190 apply their values as scaling factors to the X,
+    Y, and Z axes independently if you do not specify a P value and Setting 71
+    has a value of zero. These settings must have equal values to use them with
+    G02 or G03 commands.
+
+
+  G51 affects all appropriate positioning values in the blocks after the G51
+  command.  
+
+  Tool offsets and cutter compensation values are not affected by scaling.
+
+  For canned cycles, G51 scales the initial point, depth, and return plane
+  relative to the center of scaling.
+
+  To retain the functionality of canned cycles, G51 does not scale these:
+
+  In G73 and G83:
+   -Peck depth (Q)
+   -Depth of first peck (I)
+   -Amount to reduce peck depth per pass (J)
+   -Minimum peck depth (K)
+
+  In G76 and G77:
+   -The shift value (Q)
+-----------------------------
+{12} *G52-Info* GLOBAL WORK COORDINATE SHIFT
+  Will “shift” all work offsets that are set in the machine. In the Work
+  Offsets page of the control, if we input a value of X +1.0000, ALL of the
+  offsets will move one to the right by a value of 1.0000. This is most
+  commonly used in casting and forging work where we have core movement. 
+
+  G52 works differently depending on the value of Setting 33. Setting 33
+  selects the Fanuc or Haas style of coordinates.
+
+  If FANUC is selected, G52 is a group 00 G-code. This is a global work
+  coordinate shift. The values entered into the G52 line of the work offset
+  page are added to all work offsets. All of the G52 values in the work offset
+  page will be set to zero (0) when powered on, reset is pressed, changing
+  modes, at the end of the program, by an M30, G92 or a G52 X0 Y0 Z0 A0 B0.
+  When using a G92 (Set Work Coordinate Systems Shift Value), in Fanuc format,
+  the current position in the current work coordinate system is shifted by the
+  values of G92 (X, Y, Z, A, and B). The values of the G92 work offset are the
+  difference between the current work offset and the shifted amount commanded
+  by G92.
+
+  If HAAS is selected, G52 is a group 00 G-code. This is a global work
+  coordinate shift. The values entered into the G52 line of the work offset
+  page are added to all work offsets. All of the G52 values will be set to
+  zero (0) by a G92. When using a G92 (Set Work Coordinate Systems Shift
+  Value), in Haas format, the current position in the current work coordinate
+  system is shifted by the values of G92 (X, Y, Z, A, and B). The values of
+  the G92 work offset are the difference between the current work offset and
+  the shifted amount commanded by G92 (Set Work Coordinate Systems Shift
+  Value).
+-----------------------------
+{00} *G53-Info* POSITIONING IN REGARDS TO MACHINE HOME (NON MODAL)
+  Used inside a program when we want to move the machine a certain distance
+  and location from Machine Home. This is quite often used if we want to
+  establish a safe tool change position because we have large parts or tools
+  and need to clear the tool changer.
+-----------------------------
+{12*} *G54-Info* - {12} *G59-Info* WORK OFFSETS 1-6
+{12} *G110-Info* - {12} *G129-Info* WORK OFFSETS 7-26 OLDER
+{12} *G154-Info* P1-P99 WORK OFFSETS 7-106 NEWER
+  A work coordinate (otherwise known as a part offset) is how we tell the
+  machine where our part (or parts) are located at in the travels of the
+  machine. Under the Work Offsets page in the control, we hand wheel the
+  machine to the X & Y “Zero” location for our part, and use the “Part Offset
+  Measure” key under the Reset key to set the corresponding work offset from
+  our program (G54, G55, G56, etc…..) These are the first G-Codes that were
+  assigned to work Coordinates. This is how we tell the machine that we are
+  working on Part #1, Part #2, etc…. thru Part #6. Originally no one thought
+  we would need more than 6 part offsets, but thru time and the invention of
+  new types of machines, more were needed…..
+-----------------------------
+{16} *G68-Info* ROTATION
+  * G17, G18, G19 - Plane of rotation, default is current
+  * X/Y, X/Z, Y/Z - Center of rotation coordinates on the selected plane** 
+  * R - Angle of rotation, in degrees. Three-place decimal, -360.000 to 360.000.
+  *indicates optional
+
+  **The axis designation you use for these address codes corresponds to the
+  axes of the current plane. For example, in the G17 (XY plane), you would use
+  X and Y to specify the center of rotation.
+
+  When you command a G68, the control rotates all X, Y, Z, I, J, and K values
+  about a center of rotation to a specified angle (R),.
+  You can designate a plane with G17, G18, or G19 before G68 to establish the
+  axis plane to rotate. For example:
+
+  G17 G68 Xnnn Ynnn Rnnn ; 
+  If you do not designate a plane in the G68 block, the control uses the
+  currently active plane.
+
+  The control always uses a center of rotation to determine the positional
+  values after rotation. If you do not specify a center of rotation, the
+  control uses the current location.
+
+  G68 affects all appropriate positional values in the blocks after the G68
+  command. Values in the line that contains the G68 command are not rotated.
+  Only the values in the plane of rotation are rotated; therefore, if G17 is
+  the current plane of rotation, the command affects only the X and Y values.
+
+  A positive number (angle) in the R address rotates the feature
+  counterclockwise.
+
+  If you do not specify the angle of rotation (R), then the control uses the
+  value in Setting 72.
+
+  In G91 mode (incremental) with Setting 73 ON, the rotation angle changes by
+  the value in R. In other words, each G68 command changes the rotation angle
+  by the value specified in R.
+
+  The rotational angle is set to zero at the beginning of the program, or you
+  can set it to a specific angle with G68 in G90 mode.
+
+  Do not change the plane of rotation while G68 is in effect.
+
+  Rotation with Scaling:
+    If you use scaling and rotation at the same time, you should turn on scaling
+    before rotation, and use separate blocks. Use this template:
+    G51 ... (SCALING) ;
+    ... ;
+    G68 ... (ROTATION) ;
+    ... program ;
+    G69 ... (ROTATION OFF) ;
+    ... ;
+    G50 ... (SCALING OFF) ;
+
+  Rotation with Cutter Compensation:
+    Turn on cutter compensation after the rotation command. Turn off cutter
+    compensation before you turn off rotation.
+
+  G91 G68 Rnnn - Rotation around curent position
+  G91 G68 Xnnn Ynnn Rnnn - Rotation around relative position
+
+  Example: Gothic window shape to cut.
+    O60681 (GOTHIC WINDOW SUBPROGRAM) ;
+    F20 S500 (SET FEED AND SPINDLE SPEED) ;
+    G00 X1. Y1. (RAPID TO LOWER-LEFT WINDOW CORNER) ;
+    G01 X2. (BOTTOM OF WINDOW) ;
+    Y2. (RIGHT SIDE OF WINDOW);
+    G03 X1. R0.5 (TOP OF WINDOW) ;
+    G01 Y1. (FINISH WINDOW) ;
+    M99;
+  
+  Example: Rotate around the current work coordinate location (X0Y0Z0).
+    O60682 (ROTATE ABOUT WORK COORDINATE) ;
+    G59 (OFFSET) ;
+    G00 G90 X0 Y0 Z-0.1 (WORK COORDINATE ORIGIN) ;
+    M98 P60681 (CALL SUBPROGRAM) ;
+    G90 G00 X0 Y0 (LAST COMMANDED POSITION) ;
+    G68 R60. (ROTATE 60 DEGREES) ;
+    M98 P60681 (CALL SUBPROGRAM) ;
+    G69 G90 X0 Y0 (CANCEL G68) ;
+    M30;
+
+  Example: Center of the window as the rotation center.
+    O60683 (ROTATE ABOUT CENTER OF WINDOW) ;
+    G59 (OFFSET) ;
+    G00 G90 X0 Y0 Z-0.1 (WORK COORDINATE ORIGIN) ;
+    G68 X1.5 Y1.5 R60. (ROTATE SHAPE 60 DEGREES ABOUT CENTER) ;
+    M98 P60681 (CALL SUBPROGRAM) ;
+    G69 G90 G00 X0 Y0 (CANCEL G68, LAST COMMANDED POSITION) ;
+    M30 ;
+
+  Example: The G91 mode can be used to rotate patterns about a center. This is
+  often useful for making parts that are symmetric about a given point.
+    O60684 (ROTATE PATTERN ABOUT CENTER) ;
+    G59 (OFFSET) ;
+    G00 G90 X0 Y0 Z-0.1 (WORK COORDINATE ORIGIN) ;
+    M97 P1000 L6 (CALL LOCAL SUBPROGRAM, LOOP 6 TIMES) ;
+    M30 (END AFTER SUBPROGRAM LOOP) ;
+    N1000 (BEGIN LOCAL SUBPROGRAM) ;
+    G91 G68 R60. (ROTATE 60 DEGREES) ;
+    G90 M98 P60681 (CALL WINDOW SUBPROGRAM) ;
+    G90 G00 X0 Y0 (LAST COMMANDED POSITION) ;
+    M99;
+-----------------------------
+{00} *G70-Info* FINISHING CYCLE [LATHE]
+  The G70  Finishing  Cycle can be used  to  finish cut paths that are rough
+  cut with stock removal cycles such as G71, G72 and G73.
+    P - Starting Block number of routine to execute
+    Q - Ending Block number of routine to execute
+  G18 Z-X plane must be active
+
+  Note:
+    The  P values are  modal.  This  means  if you  are  in  the  middle  of a
+    canned cycle and a G04 Pnn or an M97 Pnn is used the P value will be used
+    for the dwell / subprogram as well as the canned cycle.
+
+    The  G70  cycle  is  similar  to  a  local  subprogram call. However,  the
+  G70 requires  that  a beginning block number (P code) and an ending block
+  number (Q code) be specified.
+
+    The G70 cycle is usually used after a G71, G72 or G73 has been performed
+  using the blocks specified by P and Q. Any F, S, or T codes with the PQ
+  block are effective. After execution of the Q block, a rapid (G00) is
+  executed returning the machine to the start position that was saved before
+  the starting of the G70. The program then returns to the block following the
+  G70 call. A subprogram in the PQ sequence is acceptable providing that the
+  subprogram does not contain a block with an N code matching the Q specified
+  by the G70 call. This feature is not compatible with FANUC controls.
+
+    After a G70, the block following the G70 will be executed, not the block
+  with an N code matching the Q code specified by the G70 call.
+
+  Example:
+    N10 ;
+    F0.14 ;
+    ... ;
+    N50 ;
+    ... ;
+    G70 P10 Q50 (finish path defined by N10 to N50) ;
+-----------------------------
+{00} *G71-Info* ROUGHING CYCLE {AXIAL} [LATHE]
+  First Block (Only use when using two block G71 notation)
+    *U - Depth of cut for each pass of stock removal, positive radius
+    *R - Retract height for each pass of stock removal
+  Second Block
+    *D - Depth of cut for each pass of stock removal, positive radius (Only
+         use when using one block G71 notation)
+    *F - Feedrate in inches (mm) per minute (G98) or per revolution (G99) to
+         use throughout G71 PQ block
+    *I - X-axis size and direction of G71 rough pass allowance, radius
+    *K - Z-axis size and direction of G71 rough pass allowance
+     P - Starting Block number of path to rough
+     Q - Ending Block number of path to rough
+    *S - Spindle speed to use throughout G71 PQ block
+    *T - Tool and offset to use throughout G71 PQ block
+    *U - X-axis size and direction of G71 finish allowance, diameter
+    *W - Z-axis size and direction of G71 finish allowance
+
+  * indicates optional
+  G18 Z-X plane must be active.
+
+  1 Block G71 Programming Example:
+    G71 D..(radi.) F... I..(radi.) K..(radi.) P... Q... S... T... U..(dia.) W..(radi.)
+
+  2 Block G71 Programming Example:
+    G71 U... R...
+    G71 F... I..(radi.) K..(radi.) P... Q... S... T... U..(dia.) W..(radi.)
+
+  Note:
+    The  P values are  modal.  This  means  if you  are  in  the  middle  of a
+    canned cycle and a G04 Pnn or an M97 Pnn is used the P value will be used
+    for the dwell / subprogram as well as the canned cycle.
+
+  This canned cycle roughs material on a part given the finished part shape.
+  Define the shape of a part by programming the finished tool path and then
+  use the G71 PQ block. Any F,S or T commands on the G71 line or in effect at
+  the time of the G71 is used throughout the G71 roughing cycle. Usually a G70
+  call to the same PQ block definition is used to finish the shape.
+
+  Two types of machining paths are addressed with a G71 command. The first
+  type of path (Type  1)  is  when  the  X-Axis  of  the  programmed  path
+  does  not  change  direction.  The second type of path (Type 2) allows the
+  X-Axis to change direction. For both Type 1 and Type 2, the programmed path
+  of the Z-axis cannot change direction. If the P block contains only an
+  X-Axis position, then Type 1 roughing is assumed. If the P block contains
+  both an X-Axis and Z-Axis position, then Type 2 roughing is assumed.
+  The Z-Axis position given in the P block to specify Type 2 roughing
+  does not have to cause axis motion. You can use the current Z-Axis
+  position. For example, In the program example on page 11, note that
+  the P1 block (indicated by the comment in parentheses) contains the
+  same Z-Axis position as the start position G00 block above.
+
+  Any one of the four quadrants of the X-Z plane can be cut by specifying
+  address codes I, K, U, and W properly.
+    Exterior right to left: U+ W+ I+ K+
+    Exterior left to right: U+ W- I+ K-
+    Interior right to left: U- W+ I- K+
+    Interior left to right: U- W- I- K-
+
+      Type I Details
+  When Type I is specified by the programmer it is assumed that the X-axis
+  tool path does not reverse during a cut. Each roughing pass X-axis location
+  is determined by applying the value specified in D to the current X
+  location. The nature of the movement along the Z clearance plane for each
+  roughing pass is determined by the G code in block P. If block P contains a
+  G00 code, then movement along the Z clearance plane is a rapid mode. If
+  block P contains a G01 then movement will be at the G71 feed rate.
+
+  Each roughing pass is stopped before it intersects the programmed tool path
+  allowing for both roughing and finishing allowances. The tool is then
+  retracted from the material, at a 45 degree angle. The tool then moves in
+  rapid mode to the Z-axis clearance plane.
+
+  When roughing is completed the tool is moved along the tool path to clean up
+  the rough cut.  If  I  and  K  are  specified  an  additional  rough  finish
+  cut  parallel  to  the  tool  path  is performed.
+
+      Type II Details
+  When Type II is specified by the programmer the X axis PQ path is allowed to
+  vary (for example, the X-axis tool path can reverse direction).
+
+  The X axis PQ path must not exceed the original starting location. The only
+  exception is the ending Q block.
+  Type II, must have a reference move, in both the X and Z axis, in the block
+  specified by P.
+
+  Roughing is similar to Type I except after each pass along the Z axis, the
+  tool will follow the path defined by PQ. The tool will then retract parallel
+  to the X axis. The Type II roughing method does not leave steps in the part
+  prior to finish cutting and typically results in a better finish.
+-----------------------------
+{00} *G72-Info* ROUGHING CYCLE {RADIAL} [LATHE]
+  First Block (Only use when using two block G72 notation)
+    *W - Depth of cut for each pass of stock removal, positive radius
+    *R - Retract height for each pass of stock removal
+  Second Block
+    *D - Depth of cut for each pass of stock removal, positive radius (Only
+         use when using one block G72 notation)
+    *F - Feedrate in inches (mm) per minute (G98) or per revolution (G99) to
+         use throughout G71 PQ block
+    *I - X-axis size and direction of G72 rough pass allowance, radius
+    *K - Z-axis size and direction of G72 rough pass allowance
+     P - Starting Block number of path to rough
+     Q - Ending Block number of path to rough
+    *S - Spindle speed to use throughout G72 PQ block
+    *T - Tool and offset to use throughout G72 PQ block
+    *U - X-axis size and direction of G72 finish allowance, diameter
+    *W - Z-axis size and direction of G72 finish allowance
+
+  *indicates optional
+  G18 Z-X plane must be active.
+
+  1 Block G72 Programming Example:
+    G72 D..(radi.) F... I..(radi.) K..(radi.) P... Q... S... T... U..(dia.) W..(radi.)
+
+  2 Block G72 Programming Example:
+    G72 U... R...
+    G72 F... I..(radi.) K..(radi.) P... Q... S... T... U..(dia.) W..(radi.)
+
+  Note:
+    The  P values are  modal.  This  means  if you  are  in  the  middle  of a
+    canned cycle and a G04 Pnn or an M97 Pnn is used the P value will be used
+    for the dwell / subprogram as well as the canned cycle.
+
+  This canned cycle removes material on a part given the finished part shape.
+  It is similar to G71  but  removes  material  along  the  face  of  a  part.
+  Define  the  shape  of  a  part  by programming  the  finished  tool  path
+  and  then  use  the  G72  PQ  block.  Any  F,S  or  T commands on the G72
+  line or in effect at the time of the G72 is used throughout the G72 roughing
+  cycle. Usually a G70 call to the same PQ block definition is used to finish
+  the shape.
+
+  Two types of machining paths are addressed with a G72 command.
+  • The first type of path (Type 1) is when the Z Axis of the programmed path
+    does not change direction. The second type of path (Type 2)  allows the Z
+    Axis  to change direction. For both the first type and the second type of
+    programmed path the X Axis cannot change direction. If Setting 33 is set
+    to FANUC, Type 1 is selected by having only an X-axis motion in the block
+    specified by P in the G72 call.
+  • When both an X-axis and Z-axis motion are in the P block then Type 2
+    roughing is assumed.
+
+  The G72 consists of a roughing phase and a finishing phase. The roughing and
+  finishing phase are handled differently for Type 1 and Type 2. Generally the
+  roughing phase consists of repeated passes along the X-axis at the specified
+  feed rate. The finishing phase consists of a pass along the programmed tool
+  path to remove excess material left by the roughing phase while leaving
+  material for a G70 finishing cycle. The final motion in either type is a
+  return to the starting position S.
+
+  Any one of the four quadrants of the X-Z plane can be cut by specifying
+  address codes I, K, U, and W properly. The following figure indicates the
+  proper signs for these address codes to obtain the desired performance in
+  the associated quadrants.
+    Exterior right to left: U+ W+ I+ K+
+    Exterior left to right: U+ W- I+ K-
+    Interior right to left: U- W+ I- K+
+    Interior left to right: U- W- I- K-
+-----------------------------
+{00} *G73-Info* ROUGHING CYCLE {OFFSET} [LATHE]
+   D - Number of cutting passes, positive integer
+  *F - Feedrate in inches (mm) per minute (G98) or per revolution (G99) to use
+       throughout G73 PQ block
+   I - X-axis distance and direction from first cut to last, radius
+   K - Z-axis distance and direction from first cut to last
+   P - Starting Block number of path to rough
+   Q - Ending Block number of path to rough
+  *S - Spindle speed to use throughout G73 PQ block
+  *T - Tool and offset to use throughout G73 PQ block
+  *U - X-axis size and direction of G73 finish allowance, diameter
+  *W - Z-axis size and direction of G73 finish allowance
+
+  * indicates optional
+  G18 Z-X plane must be active
+
+  Note:
+    The  P values are  modal.  This  means  if you  are  in  the  middle  of a
+    canned cycle and a G04 Pnn or an M97 Pnn is used the P value will be used
+    for the dwell / subprogram as well as the canned cycle.
+
+  The  G73  canned  cycle  can  be  used  for  rough  cutting  of  preformed
+  material  such  as castings. The canned cycle assumes that material has been
+  relieved or is missing a certain known distance from the programmed tool
+  path PQ.
+
+  Machining starts from the current position (S), and either rapids or feeds
+  to the first rough cut. The nature of the approach move is based on whether
+  a G00 or G01 is programmed in block  P.  Machining  continues  parallel  to
+  the programmed  tool  path.  When  block  Q  is reached a rapid departure
+  move is executed to the Start position plus the offset for the second
+  roughing pass.  Roughing passes continue in this manner for the number of
+  rough passes specified in D. After the last rough is completed, the tool
+  returns to the starting position S.
+
+  Only F, S and T prior to or in the G73 block are in effect. Any feed (F),
+  spindle speed (S) or tool change (T) codes on the lines from P to Q are
+  ignored.
+
+  The offset of the first rough cut is determined by (U/2 + I) for the X Axis,
+  and by (W + K) for the Z Axis. Each successive roughing pass moves
+  incrementally closer to the final roughing finish pass by an amount of
+  (I/(D- 1)) in the X Axis, and by an amount of (K/(D-1)) in the Z Axis. The
+  last rough cut always leaves finish material allowance specified by U/2 for
+  the X Axis and W for the Z Axis. This canned cycle is intended for use with
+  the G70 finishing canned cycle.
+
+  The programmed tool path PQ does not have to be monotonic in X or Z, but
+  care has to be taken to insure that existing material does not interfere
+  with tool movement during approach and departure moves.
+
+  Note:
+    Monotonic curves are curves that tend to move in only one direction as x
+    increases. A monotonic increasing curve always increases as x increases,
+    i.e.  f(a)>f(b)  for  all  a>b.  A  monotonic  decreasing  curve always
+    decreases as x increases, i.e. f(a)<f(b) for all a>b. The same sort of
+    restrictions are also made for the monotonic non-decreasing and monotonic
+    non-increasing curves.
+
+  The value of D must be a positive integral number. If the D value includes a
+  decimal, an alarm is generated. The four quadrants of the ZX plane can be
+  machined if the following signs for U, I, W, and K are used.
+    Exterior right to left: U+ W+ I+ K+
+    Exterior left to right: U+ W- I+ K-
+    Interior right to left: U- W+ I- K+
+    Interior left to right: U- W- I- K-
+-----------------------------
+{03} *G90-Info* ABSOLUTE POSITIONING
+  With absolute positioning, we tell the machine where to move based on a
+  common point, called X0 Y0 and Z0. Every time we need to move to a certain
+  position, the ending point of that move is in direct relationship to this
+  “common point”
+-----------------------------
+{03} *G91-Info* INCREMENTAL POSITIONING
+  With incremental positioning, we are telling the machine where to go in
+  relationship to where it currently is at. Basically like a set of directions
+  given from where the machine stopped last.
+-----------------------------
+{00} *G92-Info* SET WORK COORDINATE SYSTEM
+  Can be used to set our work offsets while “on the fly” in our program. G92
+  was used back when machines only had one offset to choose from. We had to
+  cut our first part, move the spindle over to the second part X&Y zero, and
+  then call G92 X0Y0 in our program. Our work offset is now set around the
+  second part.  Using G54 – G129 is much faster, more tunable, and easier to
+  use.
+-----------------------------
+{05} *G93-Info* INVERSE TIME FEED MODE 
+  F - Feed Rate (strokes per minute) 
+  This G code specifies that all F (feedrate) values are interpreted as
+  strokes per minute. In other words the time (in seconds) to complete the
+  programmed motion using G93 is, 60 (seconds) divided by the F value.
+
+  G93 is generally used in 4 and 5-axis work when the program is generated
+  using a CAM system. G93 is a way of translating the linear (inches/min)
+  feedrate into a value that takes rotary motion into account. When G93 is
+  used, the F value will tell you how many times per minute the stroke (tool
+  move) can be repeated.
+
+  When G93 is used, feedrate (F) is mandatory for all interpolated motion
+  blocks. Therefore each non-rapid motion block must have its own feedrate (F)
+  specification.
+  NOTE: Pressing [RESET] will set the machine to |G94| (Feed per Minute) mode.
+  Settings 34 and 79 (4th & 5th axis diameter) are not necessary when using
+  G93.
+-----------------------------
+{05} *G94-Info* FEED PER MINUTE MODE
+
+  [Mill]
+  This code deactivates |G93| (Inverse Time Feed Mode) and returns the control
+  to Feed Per Minute mode.
+-----------------------------
+{05} *G95-Info* FEED PER REVOLUTION
+
+  [Mill]
+  When G95 is active, a spindle revolution will result in a travel distance
+  specified by the Feed value. If Setting 9 is set to INCH, then the feed
+  value F will be taken as inches/rev (set to MM, then the feed will be taken
+  as mm/rev). Feed Override and Spindle Override will affect the behavior of
+  the machine while G95 is active. When a Spindle Override is selected, any
+  change in the spindle speed will result in a corresponding change in feed in
+  order to keep the chip load uniform. However, if a Feed Override is
+  selected, then any change in the Feed Override will only affect the feed
+  rate and not the spindle.
+
+  [Lathe]
+  LIVE TOOL RIGID TAPPING
+  * C - C-Axis absolute motion command (optional)
+    F - Feed Rate
+    R - Position of the R plane
+    S - RPM, called prior to G95
+    W - Z-axis incremental distance
+    X - Optional Part Diameter X-axis motion command
+  * Y - Y-axis motion command
+    Z - Position of bottom of hole
+  * indicates optional
+
+  G95 Live Tooling Rigid Tapping is an axial tapping cycle similar to G84
+  Rigid Tapping in that it uses the F, R, X and Z addresses, however, it has
+  the following differences:
+   -The control must be in G99 Feed per Revolution mode in order for tapping
+    to work properly.
+   -An S (spindle speed) command must have been issued prior to the G95.
+   -The X Axis must be positioned between machine zero and the center of the
+    main spindle, do not position beyond spindle center.
+-----------------------------
+{05} *G96-Info* SET TO CONSTANT SURFACE SPEED (CSS)
+
+  [Lathe]
+  G96 commands the control to maintain a constant cutting speed at the tip of
+  the tool. The spindle RPM is based on the diameter of the part where the cut
+  is taking place, and the commanded S value (RPM=3.82xSFM/DIA). This means
+  the spindle speed increases as the tool gets closer to X0. When Setting 9 is
+  set to INCH, the S value specifies Surface Feet Per Minute. When Setting 9
+  is set to MM, the S value specifies Surface Meters Per Minute.
+
+  It is safest to specify a maximum spindle speed for the Constant Surface
+  Speed feature. Use |G50| to set a maximum spindle RPM.  Not setting a limit
+  allows the spindle speed to increase as the tool reaches the center of the
+  part. The excessive speed can throw parts and damage tooling.
+-----------------------------
+{05} *G97-Info* SET TO FIXED RPM
+
+  [Lathe]
+  This commands the control to NOT adjust the spindle speed based on the
+  diameter of cut and cancels any G96 command. When G97 is in effect, any S
+  command is revolutions per minute (RPM).
+-----------------------------
+{10} *G98-Info* CANNED CYCLE INITIAL POINT RETURN
+
+  [Mill]
+  Using G98, the Z-Axis returns to its initial starting point (the Z position
+  in the block before the canned cycle was commanded) between each X and/or Y
+  location. This allows for positioning up and around areas of the part and/or
+  clamps and fixtures.
+
+  [Lathe]
+  Feed per minute
+-----------------------------
+{10} *G99-Info* CANNED CYCLE R PLANE RETURN
+
+  [Mill]
+  Using G99, the Z-Axis will stay at the R plane between each X and/or Y
+  location. When obstructions are not in the path of the tool G99 saves
+  machining time.
+
+  [Lathe]
+  Feed per revolution
+-----------------------------
+{00} *G100-Info* CANCEL *G101-Info* ENABLE MIRROR IMAGE
+  Programmable mirror imaging is used to turn on or off any of the axes. When
+  one is ON, axis motion may be mirrored (or reversed) around the work zero
+  point. These G codes should  be  used  in  a  command  block  without  any
+  other  G  codes.  They  do  not  cause anY Axis motion. The bottom of the
+  screen will indicate when an axis is mirrored. Also see Settings 45 through
+  48 for mirror imaging.
+  Turning on Mirror Image for only one of the X or Y axes will cause the
+  cutter to move along the opposite side of a cut. The control will
+  automatically switch the cutter compensation direction (G41, G42) and
+  reverse the circular motion commands (G02, G03) as needed.
+  When milling a shape with XY motions, turning on Mirror Image for just one
+  of the X or Y axes  will  change  climb  milling  (G41)  to  conventional
+  milling  (G42)  and/or  conventional milling to climb milling. As a result,
+  the type of cut or finish may not be what was desired.  Mirror imaging of
+  both X and Y will eliminate this problem.
+-----------------------------
+{00} *G102-Info* PROGRAMMABLE OUTPUT TO RS-232
+  Commanding a G102 will send the current work coordinates of the axes to the
+  first RS-232 port, from there a computer is used to record the values sent.
+  Each axis listed in the G102 command block is output to the RS-232 port in
+  the same format as values displayed in a program. A G102 should be used in a
+  command block without any other G-codes. It will not cause any axis motion;
+  the value for the axes have no effect.
+  Also  see  Setting  41  and  Setting  25.  The  values  sent  out  are
+  always  the  current  axis positions referenced to the current work
+  coordinate system.
+  This G-code is useful in order to probe a part (also see G31). When the probe
+  touches the part, the next line of code could be a G102 to send the axes
+  position to a computer in order to store the coordinates. This is referred to
+  as digitizing a part, which is taking a tangible part and making an
+  electronic copy of it. Additional software for personal computers is required
+  to complete this function.
+-----------------------------
+{00} *G103-Info* LIMIT BLOCK BUFFERING
+  This is commonly referred to, as Block Look-ahead which is a term used to
+  describe what the control is doing in the background during machine motions.
+  The control prepares future blocks (lines of code) ahead of time. While the
+  current block is executing, the next block has already been interpreted and
+  prepared for continuous motion.
+  When G103 P0 is programmed, block limiting is disabled. Block limiting is
+  also disabled if G103  appears  in  a  block  without  a  P  address  code.
+  When  G103  Pn  is  programmed, look-ahead is limited to n blocks.
+  G103 is also useful for debugging macro programs. Macro expressions are done
+  during look-ahead  time.  For  example,  by  inserting  a  G103  P1  into
+  the  program,  macro expressions will be performed one block ahead of the
+  currently executing block.
+-----------------------------
+{04} *G112-Info* XY TO XC INTERPOLATION *G113-Info* CANCEL INTERPOLATION
+  [LATHE]
+  The G112 XY to XC coordinate interpolation feature lets you program
+  subsequent blocks in Cartesian XY coordinates, which the control
+  automatically converts to polar XC coordinates. While it is active, the
+  control uses the G17 XY for G01 linear XY strokes and G02 and G03 for
+  circular motion. G112 also converts X, Y position commands into rotary
+  C-Axis and linear X-axis moves.
+
+  On some machines, you maybe have to double the X values when
+  programming (the X value is diameter on FANUC, and instead of G112 you have
+  to use G12.1 to enter and G13.1 to exit XC Interpolation)
+  Only G01 G02 G03 G40 G41 G42 G65 and G98 can be used when G112 is active
+  G00 is not allowed and when using G02 and G03 specify the radius with R
+  It's more predictable to orient to C0 before activating G112 but not needed
+
+  (Not so good) Example:
+    T101 (Select tool and offset 1) ;
+    G00 G18 G20 G40 G80 G99 (Safe startup) ;
+    G98 (Feed per min) ;
+    M154 (Engage C Axis) ;
+    G17 G112 (Call XY plane, XY to XC interpolation) ;
+    G00 G54 X0.875 C0. Z0.1 ;
+    (Rapid to 1st position) ;
+    P1500 M133 (Live tool CW at 1500 RPM) ;
+    M08 (Coolant on) ;
+    G01 Z0. F15. (Feed towards face) ;
+    G01 Y0.5 F5. (Linear feed) ;
+    G03 X.25 Y1.125 R0.625 (Feed CCW) ;
+    G01 X-0.75 (Linear feed) ;
+    G03 X-0.875 Y1. R0.125 (Feed CCW) ;
+    G01 Y-0.25 (Linear Feed) ;
+    G03 X-0.75 Y-0.375 R0.125 (Feed CCW) ;
+    G02 X-0.375 Y-0.75 R0.375 (Feed CW) ;
+    G01 Y-1. (Linear feed) ;
+    G03 X-0.25 Y-1.125 R0.125 (Feed CCW) ;
+    G01 X0.75 (Linear feed) ;
+    G03 X0.875 Y-1. R0.125 (Feed CCW) ;
+    G01 Y0. (Linear feed) ;
+    G00 Z0.1 (Rapid retract) ;
+    G113 (Cancel G112) ;
+    M155 (Disengage C Axis) ;
+    M135 (Live tool off) ;
+    G18 (Return to XZ plane) ;
+    G00 G53 X0 Z0 M09 (X home, Z home, coolant off) ;
+    M30 (End program) ;
+
+  (A better) Example for a 1.732 inch Hex:
+    G00 G54 (Coordinate system)
+    G00 G18 G20 G40 G80 G99 (Safe startup)
+    T505 (Tool number)
+    M154 (Activate C axis)
+    G00 C0. (Rapid to C0)
+    G97 P3000 M133 (Tool peed to RPM, the rpm, direction)
+    G98 (Feed/in)
+    G17 (Select XY working plane)
+    G112 (Activate XC Interpolation)
+    G00 X1.5 Y0. (Rapid safe X and Y)
+    G00 Z0.1 (Rapid to safe Z)
+    G01 Z-0.2 F10. (Feed to Z)
+    G01 G41 X1.0000 Y0.0000 (Left cutter comp. on start corner)
+    G01 X0.5000 Y-0.8660 (Corner 2)
+    G01 X-0.5000 Y-0.8660 (Corner 3)
+    G01 X-1.0000 Y0.0000 (Corner 4)
+    G01 X-0.5000 Y0.8660 (corner 5)
+    G01 X0.5000 Y0.8660 (Corner 6)
+    G01 X1.0000 Y0.0000 (Back to start)
+    G01 G40 X1.5000 Y0.0000 (Cutter comp. cancel)
+    G113 (Cancel XC Interpolation)
+    G18 (Select XZ working plane)
+    G53 G00 X0 Z0 (Return to machine X0 Z0)
+    G99 M135 (Feed/rev, stop live tool)
+    M155 (Disable C axis)
+    M30 (End program)
+-----------------------------
+{00} *G167-Info* MODIFY SETTING
+  P - This code specifies the setting number.
+  Q - specifies the setting value. This can be a decimal numeric value or an
+      enumerated representation for unit-less settings.
+  K - the number after the K code specifies a guard code for permanent changes.
+    This G-code allows the user permanently make changes to settings during
+  program execution.
+    The control will generate an Alarm when:
+      the P or Q code is missing.
+      the P code is not a valid setting number.
+      the Q code is not a valid for the setting number.
+  Examples of G167:
+    Example #1
+      G167 P250 Q1 K10755;
+      Turns on setting 250 Mirror Image C Axis.
+    Example #2
+      G167 P84 Q3 K10755;
+      Sets setting 84 Tool Overload Action to Autofeed.
+    Example #3
+      G167 P142 Q1.25 K10755;
+      Sets setting 142 Offset Chng Tolerance to 1.25.
+-----------------------------
+{00} *G200-Info* INDEX ON THE FLY
+
+  [LATHE]
+    U - Optional relative move in X to tool change position
+    W - Optional relative move in Z to tool change position
+    X - Optional final X position
+    Z - Optional final Z position
+    T - Required tool number and offset number in standard form
+  G200 Index on the Fly causes the lathe to perform a move away, change tools,
+  and move back to the part, to save time.
+
+  The G200 does speed things up, but it also requires you to be more careful.
+  Make sure you proof the program well, at 5% rapid, and be very cautious if
+  you are starting from the middle of the program.  Normally, your tool change
+  line consists of a few lines of code, like:
+
+    G53 G00 X0. (BRING TURRET TO SAFE X TC POS) ;
+    G53 G00 Z-10. (BRING TURRET TO SAFE Z TC POS) ;
+    T202 ;
+  Using G200, changes this code to:
+
+    G200 T202 U.5 W.5 X8. Z2. ;
+  If T101 just finished turning the O.D. of the part, you don't need to go
+  back to a safe tool change position, when using a G200. Instead (as in the
+  example) the moment the G200 line is called the turret:
+   -Unclamps, in its current position.
+   -Moves incrementally in the X and Z axes by the values stated in U and W
+    (U.5 W.5)
+   -Completes the tool change at this position.
+   -Using the new tool and work offsets, it rapids to the XZ position called
+    out on the G200 line (X8. Z2.).
+
+  This all happens very quickly, and nearly all at the same time, so try it out
+  a few times, away from the chuck.
+
+  When the turret unclamps, it moves towards the spindle a tiny amount (perhaps
+  .1-.2"), so you do not want the tool directly up against your jaws or collet
+  when the G200 is commanded.
+
+  Because the U and W moves are incremental distances from where the tool is
+  currently, if you hand jog away and start your program in a new position, the
+  turret moves up and to the right of that new position. In other words, if you
+  manually jogged back within .5" of your tailstock, and then commanded G200
+  T202 U.5 W1. X1. Z1., the turret would hit your tailstock - moving an
+  incremental W1. (1" to right). For this reason, you may want to setup your
+  Setting 93 and Setting 94, Tailstock Restricted Zone.
+
+  Information on this can be found at Tailstock Restricted Zone .
+=============================
+========== M Codes ==========~
+=============================
+*M00*   Stop Program |M00-Info|
+*M01*   Optional Program Stop |M01-Info|
+*M02*   Program End
+*M03*   Spindle Commands |M03-Info|
+*M04*   Spindle Commands |M04-Info|
+*M05*   Spindle Commands |M05-Info|
+*M06*   Tool Change |M06-Info|
+*M07*   Shower Coolant
+*M08*   Coolant On |M08-Info|
+*M09*   Coolant Off |M09-Info|
+*M10*   Engage 4th Axis Brake |M10-Info|
+*M11*   Release 4th Axis Brake |M11-Info|
+*M12*   Engage 5th Axis Brake
+*M13*   Release 5th Axis Brake
+*M14*   Engage Main Spindle Brake [Lathe] |M14-Info|
+*M15*   Release Main Spindle Brake [Lathe]
+*M16*   Tool Change |M16-Info|
+*M17*   Unclamp APC Pallet and Open APC Door
+*M18*   Clamp APC Pallet and Close APC Door
+*M19*   Orient Spindle |M19-Info|
+*M20*
+*M21*   Optional User M Function with M-Fin |M21-Info|
+*M22*   Optional User M Function with M-Fin
+*M23*   Optional User M Function with M-Fin
+*M24*   Optional User M Function with M-Fin
+*M25*   Optional User M Function with M-Fin
+*M26*   Optional User M Function with M-Fin
+*M27*   Optional User M Function with M-Fin
+*M28*   Optional User M Function with M-Fin |M28-Info|
+*M29*
+*M30*   Program End and Reset |M30-Info|
+*M31*   Chip Conveyor Forward |M31-Info|
+*M32*   Chip Conveyor Backward |M32-Info|
+*M33*   Chip Conveyor Stop |M33-Info|
+*M34*   Coolant Increment |M34-Info|
+*M35*   Coolant Decrement |M35-Info|
+*M36*   Pallet Part Ready
+*M37*
+*M38*   Spindle Speed Variation (SSV) ON |M38-Info| or |M138-Info|
+*M39*   SSV OFF [OR] Rotate Tool Turret |M39-Info|or |M139-Info|
+*M40*
+*M41*   Low Gear Override |M41-Info|
+*M42*   High Gear Override |M42-Info|
+*M43*
+*M44*
+*M45*
+*M46*   Jump if Pallet Loaded
+*M47*
+*M48*   Check Validity of Current Program
+*M49*   Set Status of Pallet
+*M50*   Execute Pallet Change
+*M51*   Set Optional User M-codes |M51-Info|
+*M52*   Set Optional User M-codes
+*M53*   Set Optional User M-codes
+*M54*   Set Optional User M-codes
+*M55*   Set Optional User M-codes
+*M56*   Set Optional User M-codes
+*M57*   Set Optional User M-codes
+*M58*   Set Optional User M-codes |M58-Info|
+*M59*   Set Output Relay |M59-Info|
+*M60*
+*M61*   Clear Optional User M-codes |M61-Info|
+*M62*   Clear Optional User M-codes
+*M63*   Clear Optional User M-codes
+*M64*   Clear Optional User M-codes
+*M65*   Clear Optional User M-codes
+*M66*   Clear Optional User M-codes
+*M67*   Clear Optional User M-codes
+*M68*   Clear Optional User M-codes |M68-Info|
+*M69*   Clear Output Relay |M69-Info|
+*M70*
+*M71*
+*M72*
+*M73*
+*M74*
+*M75*   Set |G35| or |G136| Reference Point
+*M76*   Control Display Inactive |M76-Info|
+*M77*   Control Display Active |M77-Info|
+*M78*   Alarm if Skip Signal Found
+*M79*   Alarm if Skip Signal Not Found
+*M80*   Auto Door Open |M80-Info|
+*M81*   Auto Door Close |M81-Info|
+*M82*   Tool Unclamp |M82-Info|
+*M83*   Auto Air Gun On |M83-Info|
+*M84*   Auto Air Gun Off |M84-Info|
+*M85*
+*M86*   Tool Clamp |M86-Info|
+*M87*
+*M88*   Through-Spindle Coolant On |M88-Info|
+*M89*   Through-Spindle Coolant Off |M89-Info|
+*M90*
+*M91*
+*M92*
+*M93*
+*M94*
+*M95*   Sleep Mode |M95-Info|
+*M96*   Jump if No Input
+*M97*   Local Sub-Program Call |M97-Info|
+*M98*   Sub-Program Call |M98-Info|
+*M99*   Sub-Program Return or Loop |M99-Info|
+*M100*
+*M101*
+*M102*
+*M103*
+*M104*  Probe Arm Extend
+*M105*  Probe Arm Retract
+*M106*
+*M107*
+*M108*
+*M109*  Interactive User Input |M109-Info|
+*M133*  Live Tool Forward [Lathe] |M133-Info|
+*M134*  Live Tool Reverse [Lathe]
+*M135*  Live Tool Stop [Lathe]
+*M138*  Custom SSV ON (Spindle Speed Variation) [Lahte] |M138-Info|
+*M139*  Custom SSV OFF (Spindle Speed Variation) [Lathe] |M138-Info|
+*M154*  Engage C Axis [Lathe] |M154-Info|
+*M155*  Disengage C Axis [Lathe]
+-----------------------------
+*M00-Info*   Stop Program
+  The M00 code is used to stop a program. It also stops the spindle and turns
+  off the coolant and stops interpretation look ahead processing. This is used
+  to force the operator to interact with the machine (such as check a
+  dimension, flip a part over, blow chips from a hole to tap, etc…) 
+-----------------------------
+*M01-Info*   Optional Program Stop 
+  M01 works much like M00, providing the OPT STOP mode is ON. If this mode is
+  turned on, the machine will stop at M01, if it is turned off, it is ignored.
+  Often used when the operator has discretion on stopping the machine or not
+  (usually at a tool change) 
+-----------------------------
+*M02-Info*   Program End
+  The M02 code is used to end the program like |M30| does, no difference.
+  (On the old machines this code did not reset the code, unlike M30)
+-----------------------------
+*M03-Info*   Spindle Forward 
+  The M03 code will start the spindle moving in a clockwise direction at
+  whatever speed was previously set. The machine will stop and wait for
+  acceleration of the spindle to full speed prior to moving to ensure the
+  spindle is ready to make a cut. 
+-----------------------------
+*M04-Info*   Spindle Reverse 
+  The M04 code will start the spindle moving in a counterclockwise direction
+  at whatever speed was previously set. 
+-----------------------------
+*M05-Info*   Spindle Stop 
+  The M05 code is used to stop the spindle. The block is delayed until the
+  spindle slows below 10 rpm. 
+-----------------------------
+*M06-Info*   Tool Change 
+  The M06 code is used to initiate a tool change. The previously selected tool
+  (Tn) is put into the spindle. If the spindle was running, it will be
+  stopped. No previous axis commands are required before the tool change
+  unless there is a problem with tool/part/fixture clearance. The Z-axis will
+  automatically move up to the machine zero position and the selected tool
+  will be put into the spindle. The Z-axis is left at machine zero. The
+  spindle will not be started again after the tool change but the Snnnn speed
+  and gear will be unchanged. The Tnn must be in the same block or in a
+  previous block. The coolant pump will be turned off during a tool change and
+  a air purge will open to keep chips out of the spindle. 
+-----------------------------
+*M08-Info*   Coolant On 
+  The M08 code will turn on the coolant supply. Note that the M code is
+  performed at the end of a block so that if a motion is commanded in the same
+  block, the coolant is turned on after the motion. The low coolant status is
+  only checked at the start of a program so that a low coolant condition will
+  not stop a program which is already running. 
+-----------------------------
+*M09-Info*   Coolant Off 
+  The M09 code will turn off the coolant supply. 
+-----------------------------
+*M10-Info*   Engage 4 th Axis Brake 
+  The M10 code is used to apply the optional brake to the 4 th axis. It is
+  only used when M11 is used to release the brake. 
+-----------------------------
+*M11-Info*   Release 4 th Axis Brake 
+  The M11 code will “pre-release” the 4 th axis brake. This is useful to
+  prevent the delay otherwise occurring when a 4 th axis is used with a brake
+  and a motion is commanded in that axis. It is not required, but without a
+  prior M11, there will be a delay in motion in order to release the air. 
+-----------------------------
+*M14-Info*   Engage Main Spindle Brake
+
+  [Lathe]
+  These M Codes are used for machines equipped with the optional C-Axis. M14
+  applies a caliper-style brake to hold the main spindle, while |M15| releases
+  the brake.
+-----------------------------
+*M16-Info*   Tool Change 
+  The M16 code is used to initiate a tool change. In the present machine
+  configuration, M16 works exactly like M06. (normally not used) 
+-----------------------------
+*M19-Info*   Orient Spindle 
+  The M19 code is used to orient the spindle to a fixed position. This command
+  leaves the spindle in that position and locked. The next spindle motion
+  command (Snnnn, M3, M4, M41, or M42) will unlock the spindle. 
+-----------------------------
+*M21-Info* - *M28-Info*   Optional User M 
+  The M21 through M24 codes are optional for user interfaces. They will
+  activate one of relays 25 through 28, wait for the M-fin signal, release the
+  relay, and wait for the M-fin signal to cease. The RESET button will
+  terminate any operation that is hung-up waiting for M-fin. 
+-----------------------------
+*M30-Info*   Program End and Rewind 
+  The M30 code is used to stop a program. It also stops the spindle and turns
+  off the coolant. The program pointer will be reset to the first block of the
+  program and stop. The parts counters displayed on the Current Commands
+  display are also incremented. M30 will also cancel tool length offsets. 
+-----------------------------
+*M31-Info*   Chip Conveyor Forward 
+  M31 starts the chip conveyor motor in the forward direction. 
+-----------------------------
+*M32-Info*   Chip conveyor Backward 
+  M32 starts the chip conveyor motor in the reverse direction. 
+-----------------------------
+*M33-Info*   Chip Conveyor Stop 
+  M33 stops conveyor motion. 
+-----------------------------
+*M34-Info*   Increment Coolant Spigot Position Up 
+  M34 increments the current spigot position up one place. When the machine
+  loads a tool, and it is equipped with the PCOOL option, it will associate a
+  “Coolant Position” (0 is all the way up, 34 is almost strait down) with each
+  tool and change the coolant nozzle position for each individual tool.  M34
+  will pull the nozzle up one position from where it currently sits. If we
+  need to go up three positions, we need to call M34; M34; M34. One can
+  actually use the nozzle to blow chips out of a hole with a dwell and a
+  series of M34 commands. 
+-----------------------------
+*M35-Info*   Decrement Coolant Spigot Position 
+  M35 decrements the current spigot position down one place. When the machine
+  loads a tool, and it is equipped with the PCOOL option, it will associate a
+  “Coolant Position” (0 is all the way up, 30 is almost strait down) with each
+  tool and change the coolant nozzle position for each individual tool. M35
+  will pull the nozzle down one position from where it currently sits. 
+-----------------------------
+*M38-Info*   Spinde Speed Variation ON (SSV)
+
+  [Lathe]
+  Spindle Speed Variation (SSV) allows the operator to specify a range within
+  which the spindle speed continuously varies. This is helpful in suppressing
+  tool chatter, which can lead to an undesirable part finish and/or damage to
+  the cutting tool. The control varies the spindle speed based on Settings 165
+  and 166. For example, in order to vary spindle speed +/- 50 RPM from its
+  current commanded speed with a duty cycle of 3 seconds, set Setting 165 to
+  50 and Setting 166 to 30. Using these settings, the following program varies
+  the spindle speed between 950 and 1050 RPM after the M38 command.
+  See also |M138-Info|
+-----------------------------
+*M39-Info*   Spindle Speed Variation Off [Lathe] Rotate Tool Turret [Mill]
+  
+  [Lathe]
+  Turns Spindle Speed Variaton off (See also |M139-Info|)
+
+  [Mill]
+  The M39 is used to rotate the tool turret without performing a tool change.
+  If you have a large tool in an Umbrella Style tool changer, and are worried
+  about running it into the part while machining, we can index the turret to
+  move the tool to the back of the sheet metal. 
+-----------------------------
+*M41-Info*   Low Gear Override 
+  If your machine has the optional high torque gear box option, M41 will force
+  the machine into low gear. Usually the machine will decide what gear to use
+  based on RPM (0-1000 RPM uses low gear, 1000RPM and higher uses high gear) 
+-----------------------------
+*M42-Info*   High Gear Override 
+  If your machine has the optional high torque gear box option, M42 will force
+  the machine into high gear. Usually the machine will decide what gear to use
+  based on RPM (0-1000 RPM uses low gear, 1000RPM and higher uses high gear).
+  This is useful if don’t need all that torque at a lower RPM. 
+-----------------------------
+*M51-Info* - *M58-Info*     Optional User M On 
+  M51 through M54 codes are optional for user interfaces. They will activate
+  one of relays 17 through 24 and leave it active. These are the same relays
+  used for M21-M28. Use M61-M68 to turn these off. The RESET button will turn
+  off all of these relays. 
+-----------------------------
+*M59-Info*   Output Relay Set (N) 
+-----------------------------
+*M61-Info* - *M68-Info*     Optional User M Off 
+  The M61 through M68 codes are optional for user interfaces. They will
+  deactivate one of relays 17 through 24. These are the same relays used for
+  M21-M28. 
+-----------------------------
+*M69-Info*   Output Relay Clear (N) 
+-----------------------------
+*M76-Info*   Disable Displays 
+  This code is used to disable the updating of the screen displays during high
+  speed machining. It is used to increase the speed of the central processing
+  unit in the controls of the Haas machine tool. 
+-----------------------------
+*M77-Info*   Enable Displays 
+  This code is used to enable the updating of the screen displays at the end
+  of high speed machining.
+-----------------------------
+*M80-Info*   Automatic Door Open (option) 
+-----------------------------
+*M81-Info*   Automatic Door Close (option) 
+-----------------------------
+*M82-Info*   Tool Unclamp 
+  This code is used to release the tool from the spindle. It is not normally
+  needed since tool change operations do this automatically and a manual TOOL
+  RELEASE button is available to the operator.  This M code is not recommended
+  for use since the tool will be dropped from the spindle and may damage the
+  tool, the machine, or your setup. 
+-----------------------------
+*M83-Info*   Auto Air Jet On (option) 
+-----------------------------
+*M84-Info*   Auto Air Jet Off (option) 
+-----------------------------
+*M86-Info*   Tool Clamp 
+  This code will clamp a tool into the spindle. It is not normally needed
+  since tool change operators do this automatically and a manual TOOL RELEASE
+  button is available to the operator. 
+-----------------------------
+*M88-Info*   Thru the Tool Coolant On (option) 
+  This code turns on high pressure coolant thru the tool. Make sure you have a
+  thru the tool retention knob and also a tool with holes for thru the tool
+  capability. 
+-----------------------------
+*M89-Info*   Thru the Tool Coolant Off (option) 
+-----------------------------
+*M95-Info*   Sleep Mode (Long Dwell) 
+  This code may be used to warm up the machine before operation. Format:
+  M95(hh:mm) The lines following may call up the spindle warm-up program (M98
+  P2020) 
+-----------------------------
+*M97-Info*   Local Sub-Program Call 
+  M97 is a code that we use to jump from where we currently sit in our program
+  and to “jump” to a different spot in the program. We follow the M97 with a P
+  word that corresponds with a line number. M97 P100 = Jump to line N100 
+-----------------------------
+*M98-Info*   Sub Program Call 
+  M98 works like |M97|, but jumps us out of the program we are currently in, and
+  to another program entirely. This is most often used when we have similar
+  functions or features on different parts (such as pockets, bolt hole
+  patterns, etc….). M98 P510 = Jump to Program O510. 
+-----------------------------
+*M99-Info*   Sub Program Return or Loop 
+  M99 is used when we need to return from our M97 or M98 program jump. It
+  tells the machine “go back from where you came”. If we do not use a |M97| or
+  |M98|, but put in a |M99|, the machine will jump to the beginning of the program
+  and re-run the program.
+-----------------------------
+*M109-Info*   Interactive User Input
+  P - A number in the range (500-549) representing the macro variable of the
+  same name.  This M code allows a G-code program to place a short prompt
+  (message) on the screen. A macro variable in the range 500 through 549 must
+  be specified by a P code. The program can check for any character that can
+  be entered from the keyboard by comparing with the decimal equivalent of the
+  ASCII character.
+  32	     space		        59	;	semicolon
+  33	!    exclamation mark		60	<	less than
+  34	"    double quotation mark     	61	=	equals
+  35	#    number sign		62	>	greater than
+  36	$    dollar sign		63	?	question mark
+  37	%    percent sign		64	@	at sign
+  38	&    ampersand		        65-90	A-Z	capitol letters
+  39	   closed single quote       	91	[	open square bracket
+  40	(    open parenthesis		92	\	backslash
+  41	)    close parenthesis		93	]	closed square bracket
+  42	*    asterisk		        94	^	carrot
+  43	+    plus sign		        95	_	underscore
+  44	,    comma		        96		open single quote
+  45	-    minus sign		        97-122	a-z	lowercase letters
+  46	.    period		        123	{	open curly bracket
+  47	/    slash		        124	|	vertical bar
+  48-57	0-9  numbers		        125	}	closed curly bracket
+  58	:    colon		        126	~	tilde
+
+  The following sample program asks the user a Yes or No question, then wait
+  for either a Y or an N to be entered. All other characters are ignored.
+
+  %
+  o61091 (57 M109_01 Interactive User Input) ;
+  N1 #501= 0. (Clear the variable) ;
+  N5 M109 P501 (Sleep 1 min?) ;
+  IF [ #501 EQ 0. ] GOTO5 (Wait for a key) ;
+  IF [ #501 EQ 89. ] GOTO10 (Y) ;
+  IF [ #501 EQ 78. ] GOTO20 (N) ;
+  GOTO1 (Keep checking) ;
+  N10 (A Y was entered) ;
+  M95 (00:01) ;
+  GOTO30 ;
+  N20 (An N was entered) ;
+  G04 P1. (Do nothing for 1 second) ;
+  N30 (Stop) ;
+  M30 ;
+  %
+
+  The following sample program asks the user to select a number, then wait for
+  a 1, 2, 3, 4 or a 5 to be entered; all other characters are ignored.
+
+  %
+  O61092 (58 M109_02 Interactive User Input) ;
+  N1 #501= 0 (Clear Variable #501) ;
+  (Variable #501 will be checked) ;
+  (Operator enters one of the following selections) ;
+  N5 M109 P501 (1,2,3,4,5) ;
+  IF [ #501 EQ 0 ] GOTO5 ;
+  (Wait for keyboard entry loop until entry) ;
+  (Decimal equivalent from 49-53 represent 1-5) ;
+  IF [ #501 EQ 49 ] GOTO10 (1 was entered go to N10) ;
+  IF [ #501 EQ 50 ] GOTO20 (2 was entered go to N20) ;
+  IF [ #501 EQ 51 ] GOTO30 (3 was entered go to N30) ;
+  IF [ #501 EQ 52 ] GOTO40 (4 was entered go to N40) ;
+  IF [ #501 EQ 53 ] GOTO50 (5 was entered go to N50) ;
+  GOTO1 (Keep checking for user input loop until found) ;
+  N10 ;
+  (If 1 was entered run this sub-routine) ;
+  (Go to sleep for 10 minutes) ;
+  #3006= 25 (Cycle start sleeps for 10 minutes) ;
+  M95 (00:10) ;
+  GOTO100 ;
+  N20 ;
+  (If 2 was entered run this sub routine) ;
+  (Programmed message) ;
+  #3006= 25 (Programmed message cycle start) ;
+  GOTO100 ;
+  N30 ;
+  (If 3 was entered run this sub routine) ;
+  (Run sub program 20) ;
+  #3006= 25 (Cycle start program 20 will run) ;
+  G65 P20 (Call sub-program 20) ;
+  GOTO100 ;
+  N40 ;
+  (If 4 was entered run this sub routine) ;
+  (Run sub program 22) ;
+  #3006= 25 (Cycle start program 22 will be run) ;
+  M98 P22 (Call sub program 22) ;
+  GOTO100 ;
+  N50 ;
+  (If 5 was entered run this sub-routine) ;
+  (Programmed message) ;
+  #3006= 25 (Reset or cycle start will turn power off) ;
+  #1106= 1 ;
+  N100 ;
+  M30 ;
+  %
+-----------------------------
+*M133-Info* - *M134-Info* - *M135-Info*  Live Tool Fwd/Rev/Stop
+
+  [Lathe]
+  |M133| turns the live tool spindle in the forward direction. |M134| turns the
+  live tool spindle in the reverse direction. |M135| stops the live tool spindle
+  Spindle speed is controlled with a P address code. For example, P1200 would
+  command a spindle speed of 1200 RPM.
+-----------------------------
+*M138-Info* - *M139-Info*  Spindle Speed Variation (SSV)
+  |M138| turns SSV ON and |M139| turns SSV OFF
+  Spindle Speed Variation (SSV) lets you specify a range within which the
+  spindle speed continuously varies. This is helpful in suppressing tool
+  chatter, which can lead to an undesirable part finish and/or damage to the
+  cutting tool. The control varies the spindle speed based on Settings 165 and
+  166. For example, to vary spindle speed +/- 100 RPM from its current
+  commanded speed with a duty cycle of 1 seconds, set Setting 165 to 100 and
+  Setting 166 to 1.
+
+  The variation you use depends on the material, tooling, and the
+  characteristics of you application, but 100 RPM over 1 second is a good
+  starting point.
+
+  You can override the values of settings 165 and 166 using P and E address
+  codes when used with M138. Where P is SSV Variation (RPM) and E is the SSV
+  Cycle (Sec). See example below:
+
+  M138 P500 E1.5 (Turn SSV On, vary the speed by 500 RPM, cycle every 1.5 sec)
+  M138 P500 (Turn SSV on, vary the speed by 500, cycle based on setting 166)
+  M138 E1.5 (Turn SSV on, vary the speed by setting 165, cycle every 1.5 sec)
+
+  M138 is independent of spindle commands; once commanded, it is active even
+  when the spindle is not turning. Also, M138 remains active until canceled
+  with M139, or at M30, Reset, or Emergency Stop.
+
+  Note:
+  If you have an M138 Enn on one line and a G187 Enn on another line, the E
+  codes would be unique to the line they are on. The Enn Code for the G187
+  would apply to G187 only and not affect the active SSV behavior.
+-----------------------------
+*M154-Info*   C Axis Engage
+
+  [Lathe]
+  This M code is used to engage or M155 to disengage the optional C-Axis motor
+  Use before programming any C Axis move on the lathe and use M14 (Brake) if
+  needed
+=============================
+======== Other Codes ========~
+=============================
+*Acode* *A-code* *gcodeA* *g-code-A* *gcA*
+A - Fourth Axis Rotary Motion
+  The letter A is used to specify motion for the optional fourth, A, axis.  It
+  specifies an angle in degrees for the  rotary  axis.  We  can  assign  a
+  value  of  rotary  motion  between  -8380.000  degrees,  and  8380.000
+  degrees. Both positioning and simultaneous motion can be accomplished with a
+  rotary axis.  Normally the A axis is designated as rotation around the X
+  axis.
+-----------------------------
+*Bcode* *B-code* *gcodeB* *g-code-B* *gcB*
+B - Fifth Axis Rotary Motion
+  The letter B is used to specify motion for the optional fourth, B axis.  It
+  specifies an angle in degrees for the rotary axis. We can assign a value of
+  rotary motion between -8380.000 degrees, and 8380.000 degrees. Both
+  positioning and simultaneous motion can be accomplished with a rotary axis.
+  Normally the B axis is designated as rotation around the Y axis. 
+-----------------------------
+*Ccode* *C-code* *gcodeC* *g-code-C* *gcC*
+C - Auxiliary External Rotary Axis
+  The letter C is used to specify motion for the optional fourth, C axis.  It
+  specifies an angle in degrees for the rotary axis. We can assign a value of
+  rotary motion between -8380.000 degrees, and 8380.000 degrees.  This axis is
+  an optional axis that is interfaced thru the control for positioning moves
+  only.  Normally the C axis is designated as rotation around the Z axis. 
+-----------------------------
+*Dcode* *D-code* *gcodeD* *g-code-D* *gcD*
+D - Tool Diameter Selection
+  D’s are used to define a tool diameter offset from the Tool Offset Page. We
+  can choose a D value from D01 – D200, which corresponds to the “Geometry”
+  column in the Tool Offset Page. For example, D01=”Tool Offset Value Number
+  1”, D02=”Offset Number 2”, etc….. 
+-----------------------------
+*Ecode* *E-code* *gcodeE* *g-code-E* *gcE*
+E - Contouring Accuracy
+  E’s are used in conjunction with the G187 code that is “Haas Specific”.
+  G187 is defined as Contouring Control with machines that have the high speed
+  machining option. G187 is used to control the machine during high feed rates
+  and control the acceleration / de-acceleration of the machine’s axis.  The
+  range of values possible for the E code is 0.0001 to 0.25.  Normally setting
+  #85 is set to .005 and setting #191 is set to medium on machines with the
+  high speed machining option.  
+   
+  E is also used in the G47 Engraving Canned Cycle to prescribe the infeed
+  rate in in/min. 
+-----------------------------
+*Fcode* *F-code* *gcodeF* *g-code-F* *gcF*
+F - Feed Rate
+  F’s are used to define the speed of the movement of the spindle as it
+  travels. Typically used while the tool is in the material, this is either
+  defined as Inches Per Minute (IPM) or in Millimeters Per Minute (MMPM).  It
+  is the distance that the machine would move in one minute (Example, F10.0 =
+  10 Linear IPM of Speed)
+-----------------------------
+*Gcode* *G-code* *gcodeG* *g-code-G* *gcG*
+G - Preparatory Functions (G Codes)
+  G Codes establish Modes of Operation. When we define a G Code, think of it
+  like we are flipping a rotary switch on a TV to another mode (channel). For
+  example, G83 is the code for Deep Hole Peck Drilling. We tell the machine
+  “G83” and then tell the machine where the holes are located since we are in
+  Drilling Mode. When done, we take the machine out of Drilling Mode with a
+  “G80” which means Canned Cycle Cancel. G codes are used to establish what
+  “Mode” the machine is in. 
+  - Codes come in groups.  Each group of codes will have a specific group
+    number. (Imagine each group of codes as a knob on a TV)
+  - A “G” code from the same group can be replaced by another code in the same
+    group. By doing this, the programmer establishes modes of operation.  The
+    universal rule here is that codes from the same group cannot be used more
+    than once on the same line. (We cannot have a knob in two different
+    positions)
+  - There are modal G codes, which, once established, remain effective until
+    replaced with another code from the same group (Like a light switch on a
+    car, turn the switch on it stays on till it is turned off)
+  - There are non-modal G codes which, once called, are effective only in the
+    calling block and are immediately forgotten by the control (Like a horn in
+    a car, it is only on momentarily)
+  The rules above govern the use of all codes for programming the Haas (and
+  other) controls.  The concept of grouping codes and the rules that apply
+  will have to be remembered if we are to effectively program the machine
+  tool.
+  Groups with {*} indicate defaults within each group 
+-----------------------------
+*Hcode* *H-code* *gcodeH* *g-code-H* *gcH*
+  [Mill]
+H - Tool Length Offset Value
+  The H is used to tell the machine what tool length value to use from the
+  Tool Offset page. If we define H01, we are telling the machine to use the
+  value that is located under Tool Length #01. H02 = Tool Length Value #2
+  [Lathe]
+H - Incremental C axis movement
+  The H is used to rotate the C axis relative to the actual position with the
+  value specified in degrees (Tip, you can use G28 H0 to home the C axis)
+-----------------------------
+*Icode* *I-code* *gcodeI* *g-code-I* *gcI*
+I - Canned Cycle and Circular Optional Data
+  The letter I is used two different ways. It can be used in canned cycles
+  (Drilling Operations) and it is used in defining arcs, in that we tell the
+  machine incrementally from the start point of an arc, where the center of
+  the arc is. I is used to tell the machine how far away the center of the arc
+  is in the X axis.
+-----------------------------
+*Jcode* *J-code* *gcodeJ* *g-code-J* *gcJ*
+J - Canned Cycle and Circular Optional Data
+  The letter J is used two different ways. It can be used in canned cycles
+  (Drilling Operations) and it is used in defining arcs, in that we tell the
+  machine incrementally from the start point of an arc, where the center of
+  the arc is. J is used to tell the machine how far away the center of the arc
+  is in the Y axis.
+-----------------------------
+*Kcode* *K-code* *gcodeK* *g-code-K* *gcK*
+K - Canned Cycle and Circular Optional Data
+  The letter K is used two different ways. It can be used in canned cycles
+  (Drilling Operations) and it is used in defining arcs, in that we tell the
+  machine incrementally from the start point of an arc, where the center of
+  the arc is. K is used to tell the machine how far away the center of the arc
+  is in the Z axis. 
+-----------------------------
+*Lcode* *L-code* *gcodeL* *g-code-L* *gcL*
+L - Loop Count for Repeated Cycles
+  The L address character is used to specify a repetition count for some
+  canned cycles and auxiliary functions.  It is followed by an unsigned number
+  between 0 and 32767.
+-----------------------------
+*Mcode* *M-code* *gcodeM* *g-code-M* *gcM*
+M - Miscellaneous Functions (M Codes)
+  M codes are used to turn on and off functions specific to that of the
+  machine. For example, M3 and M4 turn the spindle on, M5 turns the spindle
+  off. M8 turns coolant on, M9 off. Think of it like M means “Machine
+  Function”.
+-----------------------------
+*Ncode* *N-code* *gcodeN* *g-code-N* *gcN*
+N - Number of Block
+  The N address character is entirely optional.  It can be used to identify or
+  number each block of a program.  It is followed by a number between 0 and
+  99999.  The M97 functions may reference an N line number.
+-----------------------------
+*Ocode* *O-code* *gcodeO* *g-code-O* *gcO*
+O - Program Number/Name
+  The O address character is used to identify a program.  It is followed by a
+  number between 0 and 99999.  A program saved in memory always has an Onnnnn
+  identification in the first block; it cannot be deleted.  Altering  the  O
+  in  the  first  block  causes  the  program  to be renamed.  A program can
+  only have one O address.
+-----------------------------
+*Pcode* *P-code* *gcodeP* *g-code-P* *gcP*
+P - Delay Time or Program Number
+  P is another dual function letter in that it can be used to define a pause
+  with a |G04| code, or it is used with a |M97| or |M98| code to tell the machine to
+  “jump” from it’s current place in a program to another place in the program
+  (in the case of M97 P100 = Jump to line N100) or to another program entirely
+  (with M98 P520 = Jump to program O520), you can also use |M99| to jump to
+  another line (block) if you didn't use |M97| or |M98|, see |M99-Info| for more.
+  A length of a pause can be defined two different ways, in Seconds (with a
+  decimal  point)  or Milliseconds (without  a  decimal).  G4  P.1 would  mean
+  wait  .1 seconds, and G4 P100 (without  a  decimal)  would  mean  wait  100
+  Milliseconds.  Both  .1 Seconds and 100 Milliseconds are the same amount of
+  time.
+-----------------------------
+*Qcode* *Q-code* *gcodeQ* *g-code-Q* *gcQ*
+Q - Canned Cycle Optional Data
+  The letter Q is used in canned cycles, most often as the “Peck” distance in
+  a drilling cycle.
+-----------------------------
+*Rcode* *R-code* *gcodeR* *g-code-R* *gcR*
+R - Canned Cycle and Circular Optional Data
+  R is another dual role character. It can be used in canned (drilling) cycles
+  to define the “Rapid Plane” (how far above the part to rapid the tool to),
+  or it is used I defining an arc’s radius (replacing the I, J, and K method).
+  Refer to the Line and Arc Interpolation Section of this manual for more
+  detail.
+-----------------------------
+*Scode* *S-code* *gcodeS* *g-code-S* *gcS*
+S - Spindle Speed Command
+  S  defines  the  spindle  rpm.  We  can  use  a  value  anywhere  between
+  S0  –  S99999. If we define a speed higher than the capacity of the machines
+  spindle, it will max out the machines RPM and start cutting. For example, a
+  standard VF spindle is 7,500 RPM. If we tell the machine S15000 M03 (turn on
+  the spindle forward at 15,000 RPM) the machine will go to the 7,500 and
+  start cutting. Be aware of your machine’s capabilities (4k, 7.5k, 10k, 12k,
+  15k or 30k) before programming speeds and feeds.
+-----------------------------
+*Tcode* *T-code* *gcodeT* *g-code-T* *gcT*
+T - Tool Selection Code
+  A standard Haas VMC can be equipped with a 10, 20, 24, 30, 40, etc…. Tool
+  Changers, but the control has the  capability  of  saving  in  its  memory
+  up  to  200  Tools.  It  is  possible  to  STORE  tool  number  121  in  a
+  machine that only has a 24-tool Tool Changer. A T code tells the machine
+  what tool we want to put in the spindle. NOTE on  Haas  machines  with
+  a  side  mount  tool  changer  (Tool  are  stored  randomly  in  the
+  magazine) a “Tool Pre-Call” may be necessary to “Stage” the tool change.
+-----------------------------
+*Ucode* *U-code* *gcodeU* *g-code-U* *gcU*
+  [Lathe]
+U - Incremental X movement (relative to actual position)
+-----------------------------
+*Vcode* *V-code* *gcodeV* *g-code-V* *gcV*
+  [Lathe]
+V - Incremental Y movement (relative to actual position)
+-----------------------------
+*Wcode* *W-code* *gcodeW* *g-code-W* *gcW*
+  [Lathe]
+W - Incremental Z movement (relative to actual position)
+-----------------------------
+*Xcode* *X-code* *gcodeX* *g-code-X* *gcX*
+X - X Axis Motion
+  The X address character is used to specify motion for the X-axis.  It
+  specifies a position or distance along the X-axis.  It is either in inches
+  with four fractional positions or mm with three fractional positions.  It is
+  followed  by  a  signed  number  in  inches  between  -8380.000  and
+  8380.000  or  between  -83800.00  and 83800.00  for metric.  If no decimal
+  point is entered, the last digit is assumed to be 1/10000 inches or 1/1000
+  mm.
+-----------------------------
+*Ycode* *Y-code* *gcodeY* *g-code-Y* *gcY*
+Y - Y Axis Motion
+  The Y address character is used to specify motion for the Y-axis.  It
+  specifies a position or distance along the Y-axis.  It is either in inches
+  with four fractional positions or mm with three fractional positions.  It is
+  followed  by  a  signed  number  in  inches  between  -8380.000  and
+  8380.000  or  between  -83800.00  and 83800.00  for metric.  If no decimal
+  point is entered, the last digit is assumed to be 1/10000 inches or 1/1000
+  mm.
+-----------------------------
+*Zcode* *Z-code* *gcodeZ* *g-code-Z* *gcZ*
+Z - Z Axis Motion
+  The Z address character is used to specify motion for the Z-axis. It
+  specifies a position or distance along the Z-axis.  It is either in inches
+  with four fractional positions or mm with three fractional positions.  It is
+  followed  by  a  signed  number  in  inches  between  -8380.000  and
+  8380.000  or  between  -83800.00  and 83800.00  for metric.  If no decimal
+  point is entered, the last digit is assumed to be 1/10000 inches or 1/1000
+  mm. 
+-----------------------------
+vim:tw=78:ts=8:ft=help:norl:

@@ -1,13 +1,13 @@
 " Vim syntax file
-" Language:    ByoText files
+" Language:    Byo text files
 " Maintainer:  Robert Kiss
-" Last Change: Nov 27 2014
+" Last Change: Aug 08 2018
 " Description: Just plain information in a text file
 " =========
 " Settings:
 " =========
 filetype plugin on 
-colorscheme xoria256
+"colorscheme xoria256
 set iskeyword=33-126
 syn case ignore
 " =======
